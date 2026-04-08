@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: agendamento-salas-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-agendamento_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-agendamento_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-agendamento_salas}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-agendamento_user} -d ${POSTGRES_DB:-agendamento_salas}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
