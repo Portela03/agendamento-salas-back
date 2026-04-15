@@ -26,6 +26,11 @@ export function ensureAuthenticated(
   res: Response,
   next: NextFunction,
 ): void {
+  if (req.method === 'OPTIONS') {
+    next();
+    return;
+  }
+
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {

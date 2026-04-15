@@ -21,15 +21,16 @@ enum UserStatus {
 
 
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      UserRole
-  status    UserStatus @default(PENDENTE)
-  approvedAt DateTime? @map("approved_at")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id         String     @id @default(uuid())
+  name       String
+  email      String     @unique
+  password   String
+  role       UserRole
+  status     UserStatus @default(PENDENTE)
+  approvedAt DateTime?  @map("approved_at")
+  createdAt  DateTime   @default(now()) @map("created_at")
+  updatedAt  DateTime   @updatedAt @map("updated_at")
+  reservas   Reserva[]
 
   @@map("users")
 }
@@ -56,4 +57,27 @@ model Class {
   updatedAt   DateTime    @updatedAt @map("updated_at")
 
   @@map("classes")
+}
+
+model Reserva {
+  id          String   @id @default(uuid())
+  professorId String
+  salaId      String
+  data        DateTime
+  horario     String
+  periodo     String
+  semestre    String
+  status      String
+  createdAt   DateTime @default(now())
+
+  professor User @relation(fields: [professorId], references: [id])
+  sala      Sala @relation(fields: [salaId], references: [id])
+}
+
+model Sala {
+  id        String   @id @default(uuid())
+  nome      String
+  createdAt DateTime @default(now())
+
+  reservas Reserva[]
 }
