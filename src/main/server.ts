@@ -6,6 +6,7 @@ import { userRouter } from '../infrastructure/http/routes/userRoutes';
 import { bootstrapFirstCoordinator } from './bootstrapFirstCoordinator';
 import { reservaRoutes } from '../infrastructure/http/routes/reservaRoutes';
 import { ensureAuthenticated } from '../infrastructure/http/middlewares/authMiddleware';
+import { prismaClient } from '../infrastructure/database/prisma/prismaClient';
 
 
 const app = express();
@@ -44,6 +45,16 @@ app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
 
 app.use('/api/reservas', ensureAuthenticated, reservaRoutes);
+
+// ── Salas (listagem para o frontend) ─────────────────────────────────────────
+app.get('/api/salas', ensureAuthenticated, async (_req, res) => {
+  try {
+    const salas = await prismaClient.sala.findMany({ orderBy: { nome: 'asc' } });
+    res.json(salas);
+  } catch {
+    res.status(500).json({ message: 'Erro ao buscar salas.' });
+  }
+});
 
 // ── Health-check ──────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {
