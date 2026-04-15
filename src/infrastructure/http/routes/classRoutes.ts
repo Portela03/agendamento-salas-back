@@ -11,4 +11,16 @@ classRouter.post(
     (req, res) => classController.create(req, res),  
 );
 
+classRouter.patch(
+    '/:id',
+    ensureAuthenticated,
+    (req, res) => classController.update(req, res),
+)
+
+classRouter.get(
+    '/',
+    ensureAuthenticated,
+    (req, res) => classController.listAll(req, res),
+)
+
 export { classRouter }

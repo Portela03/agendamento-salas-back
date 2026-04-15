@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { Class, ClassType, ClassStatus } from '../../../domain/entities/Class';
-import { CreateClassData, IClassRepository } from '@domain/repositories/IClassRepository';  
+import { CreateClassData, IClassRepository } from '../../../domain/repositories/IClassRepository';  
 
 export class PrismaClassRepository implements IClassRepository {
     constructor(private readonly prisma: PrismaClient) {}

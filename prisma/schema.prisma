@@ -47,7 +47,7 @@ enum ClassStatus {
 
 model Class {
   id          String      @id @default(uuid())
-  name        String 
+  name        String      @unique
   description String?
   capacity    Int       
   type        ClassType
