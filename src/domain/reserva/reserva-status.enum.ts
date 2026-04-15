@@ -1,0 +1,5 @@
+export enum ReservaStatus {
+  AGUARDANDO = 'AGUARDANDO',
+  APROVADA = 'APROVADA',
+  REJEITADA = 'REJEITADA'
+}
