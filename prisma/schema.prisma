@@ -19,6 +19,7 @@ enum UserStatus {
   APROVADO
 }
 
+
 model User {
   id        String   @id @default(uuid())
   name      String
@@ -31,4 +32,28 @@ model User {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("users")
+}
+
+enum ClassType {
+  SALA
+  LABORATORIO
+  AUDITORIO
+}
+
+enum ClassStatus {
+  INDISPONIVEL
+  DISPONIVEL
+}
+
+model Class {
+  id          String      @id @default(uuid())
+  name        String 
+  description String?
+  capacity    Int       
+  type        ClassType
+  status      ClassStatus @default(DISPONIVEL)
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  @@map("classes")
 }

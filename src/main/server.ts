@@ -3,6 +3,7 @@ import cors from 'cors';
 import express from 'express';
 import { authRouter } from '../infrastructure/http/routes/authRoutes';
 import { userRouter } from '../infrastructure/http/routes/userRoutes';
+import { classRouter} from '../infrastructure/http/routes/classRoutes';
 import { bootstrapFirstCoordinator } from './bootstrapFirstCoordinator';
 
 const app = express();
@@ -13,6 +14,7 @@ app.use(express.json());
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
+app.use('/api/class', classRouter);
 
 // ── Health-check ──────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {
