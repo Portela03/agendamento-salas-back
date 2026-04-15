@@ -35,15 +35,16 @@ model User {
 }
 
 model Reserva {
-  id          String   @id @default(uuid())
-  professorId String
-  salaId      String
-  data        DateTime
-  horario     String
-  periodo     String
-  semestre    String
-  status      String
-  createdAt   DateTime @default(now())
+  id             String    @id @default(uuid())
+  professorId    String
+  salaId         String
+  data           DateTime
+  horario        String
+  periodo        String
+  semestre       String
+  status         String
+  justificativa  String?
+  createdAt      DateTime  @default(now())
 
   professor User @relation(fields: [professorId], references: [id])
   sala      Sala @relation(fields: [salaId], references: [id])

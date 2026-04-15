@@ -1,24 +1,46 @@
 import { Router } from "express";
 import { ReservaController } from "../controllers/reservaController";
+import { ensureAuthenticated, ensureRole } from "../middlewares/authMiddleware";
 
 const reservaRoutes = Router();
 const reservaController = new ReservaController();
 
-// ✅ agora é só "/"
-reservaRoutes.post("/", (req, res) =>
-  reservaController.criar(req, res)
+// Professor: criar reserva (autenticado)
+reservaRoutes.post(
+  "/",
+  ensureAuthenticated,
+  (req, res) => reservaController.criar(req, res)
 );
 
-reservaRoutes.get("/", (req, res) =>
-  reservaController.listar(req, res)
+// Professor: listar suas próprias reservas
+reservaRoutes.get(
+  "/minhas",
+  ensureAuthenticated,
+  (req, res) => reservaController.listarPorProfessor(req, res)
 );
 
-reservaRoutes.patch("/:id/aprovar", (req, res) =>
-  reservaController.aprovar(req, res)
+// Coordenador: listar todas as reservas
+reservaRoutes.get(
+  "/",
+  ensureAuthenticated,
+  ensureRole('COORDENADOR'),
+  (req, res) => reservaController.listar(req, res)
 );
 
-reservaRoutes.patch("/:id/rejeitar", (req, res) =>
-  reservaController.rejeitar(req, res)
+// Coordenador: aprovar reserva
+reservaRoutes.patch(
+  "/:id/aprovar",
+  ensureAuthenticated,
+  ensureRole('COORDENADOR'),
+  (req, res) => reservaController.aprovar(req, res)
+);
+
+// Coordenador: rejeitar reserva
+reservaRoutes.patch(
+  "/:id/rejeitar",
+  ensureAuthenticated,
+  ensureRole('COORDENADOR'),
+  (req, res) => reservaController.rejeitar(req, res)
 );
 
 export { reservaRoutes };

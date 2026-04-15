@@ -15,6 +15,7 @@ export interface ReservaRepository {
 
   updateStatus(
     id: string,
-    status: string
+    status: string,
+    justificativa?: string
   ): Promise<Reserva>
 }

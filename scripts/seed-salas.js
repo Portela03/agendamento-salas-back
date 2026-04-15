@@ -1,0 +1,41 @@
+/**
+ * Seed: cria salas de exemplo para desenvolvimento
+ * Execute com: node scripts/seed-salas.js
+ */
+require('dotenv').config();
+const { PrismaClient } = require('@prisma/client');
+
+const prisma = new PrismaClient();
+
+const salas = [
+  { nome: 'Sala 101' },
+  { nome: 'Sala 102' },
+  { nome: 'Sala 103' },
+  { nome: 'Sala 201' },
+  { nome: 'Sala 202' },
+  { nome: 'Sala 301' },
+  { nome: 'Sala 302' },
+  { nome: 'Lab de Informática 1' },
+  { nome: 'Lab de Informática 2' },
+  { nome: 'Auditório' },
+];
+
+async function main() {
+  console.log('Criando salas de exemplo...');
+
+  for (const sala of salas) {
+    const exists = await prisma.sala.findFirst({ where: { nome: sala.nome } });
+    if (!exists) {
+      const created = await prisma.sala.create({ data: sala });
+      console.log(`  ✅ Criada: ${created.nome} (${created.id})`);
+    } else {
+      console.log(`  ⏩ Já existe: ${sala.nome}`);
+    }
+  }
+
+  console.log('\nSeed concluído!');
+}
+
+main()
+  .catch(console.error)
+  .finally(() => prisma.$disconnect());

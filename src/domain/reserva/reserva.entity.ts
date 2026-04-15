@@ -9,7 +9,12 @@ export class Reserva {
   periodo: string
   semestre: string
   status: ReservaStatus
+  justificativa?: string
   createdAt: Date
+
+  // Enriched fields (joined from DB, not persisted)
+  professorNome?: string
+  salaNome?: string
 
   constructor(props: {
     id?: string
@@ -20,7 +25,10 @@ export class Reserva {
     periodo: string
     semestre: string
     status?: ReservaStatus
+    justificativa?: string
     createdAt?: Date
+    professorNome?: string
+    salaNome?: string
   }) {
     this.id = props.id
     this.professorId = props.professorId
@@ -30,14 +38,18 @@ export class Reserva {
     this.periodo = props.periodo
     this.semestre = props.semestre
     this.status = props.status ?? ReservaStatus.AGUARDANDO
+    this.justificativa = props.justificativa
     this.createdAt = props.createdAt ?? new Date()
+    this.professorNome = props.professorNome
+    this.salaNome = props.salaNome
   }
 
   aprovar() {
     this.status = ReservaStatus.APROVADA
   }
 
-  rejeitar() {
+  rejeitar(justificativa: string) {
     this.status = ReservaStatus.REJEITADA
+    this.justificativa = justificativa
   }
 }
