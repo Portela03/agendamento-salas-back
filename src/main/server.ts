@@ -3,6 +3,7 @@ import cors from 'cors';
 import express from 'express';
 import { authRouter } from '../infrastructure/http/routes/authRoutes';
 import { userRouter } from '../infrastructure/http/routes/userRoutes';
+import { classRouter} from '../infrastructure/http/routes/classRoutes';
 import { bootstrapFirstCoordinator } from './bootstrapFirstCoordinator';
 import { reservaRoutes } from '../infrastructure/http/routes/reservaRoutes';
 import { ensureAuthenticated } from '../infrastructure/http/middlewares/authMiddleware';
@@ -43,14 +44,17 @@ app.use(express.json());
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
+app.use('/api/class', classRouter);
 
 app.use('/api/reservas', ensureAuthenticated, reservaRoutes);
 
 // ── Salas (listagem para o frontend) ─────────────────────────────────────────
 app.get('/api/salas', ensureAuthenticated, async (_req, res) => {
   try {
-    const salas = await prismaClient.sala.findMany({ orderBy: { nome: 'asc' } });
-    res.json(salas);
+    const classes = await prismaClient.class.findMany({
+      orderBy: { name: 'asc' },
+    });
+    res.json(classes);
   } catch {
     res.status(500).json({ message: 'Erro ao buscar salas.' });
   }

@@ -19,6 +19,7 @@ enum UserStatus {
   APROVADO
 }
 
+
 model User {
   id         String     @id @default(uuid())
   name       String
@@ -34,26 +35,44 @@ model User {
   @@map("users")
 }
 
-model Reserva {
-  id             String    @id @default(uuid())
-  professorId    String
-  salaId         String
-  data           DateTime
-  horario        String
-  periodo        String
-  semestre       String
-  status         String
-  justificativa  String?
-  createdAt      DateTime  @default(now())
-
-  professor User @relation(fields: [professorId], references: [id])
-  sala      Sala @relation(fields: [salaId], references: [id])
+enum ClassType {
+  SALA
+  LABORATORIO
+  AUDITORIO
 }
 
-model Sala {
-  id        String   @id @default(uuid())
-  nome      String
-  createdAt DateTime @default(now())
+enum ClassStatus {
+  INDISPONIVEL
+  DISPONIVEL
+}
 
-  reservas Reserva[]
+model Class {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  description String?
+  capacity    Int
+  type        ClassType
+  status      ClassStatus  @default(DISPONIVEL)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  reservas    Reserva[]
+
+  @@map("classes")
+}
+
+model Reserva {
+  id            String    @id @default(uuid())
+  professorId   String
+  classId       String
+  data          DateTime
+  horario       String
+  periodo       String
+  semestre      String
+  status        String
+  justificativa String?
+  createdAt     DateTime  @default(now())
+
+  professor User  @relation(fields: [professorId], references: [id])
+  class     Class @relation(fields: [classId], references: [id])
 }

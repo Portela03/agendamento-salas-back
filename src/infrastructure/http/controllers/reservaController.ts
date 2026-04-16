@@ -14,19 +14,23 @@ export class ReservaController {
 
   async criar(request: Request, response: Response) {
     try {
-      const { salaId, data, horario, periodo, semestre } = request.body;
+      const { classId, salaId, data, horario, periodo, semestre } = request.body;
+
+      const resolvedClassId = classId ?? salaId; // compatibilidade legado
+      if (!resolvedClassId) {
+        return response.status(400).json({ message: "classId é obrigatório." });
+      }
 
       const professorId = request.user!.id;
-
       const useCase = new CriarReservaUseCase(reservaRepository);
 
       const reserva = await useCase.execute({
         professorId,
-        salaId,
+        classId: resolvedClassId,
         data: new Date(data),
         horario,
         periodo,
-        semestre
+        semestre,
       });
 
       return response.status(201).json(reserva);
@@ -34,7 +38,7 @@ export class ReservaController {
       if (error instanceof Error) {
         return response.status(400).json({ message: error.message });
       }
-      return response.status(500).json({ message: 'Erro interno do servidor.' });
+      return response.status(500).json({ message: "Erro interno do servidor." });
     }
   }
 
