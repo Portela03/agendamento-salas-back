@@ -38,10 +38,17 @@ export class PrismaClassRepository implements IClassRepository {
 
     async listAll(): Promise<Class[]> {
         const raws = await this.prisma.class.findMany({ 
-            where: {status: 'DISPONIVEL'},
             orderBy: {name: 'asc'}
         });
         return raws.map((raw) => this.toDomain(raw));
+    }
+
+    async listAvaiable(): Promise<Class[]> {
+        const raws = await this.prisma.class.findMany({
+            where: {status: 'DISPONIVEL'},
+            orderBy: {name: 'asc'}
+        });
+        return raws.map((raw) => this.toDomain(raw))
     }
 
     private toDomain(raw: {

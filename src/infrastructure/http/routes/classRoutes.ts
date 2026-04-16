@@ -23,4 +23,16 @@ classRouter.get(
     (req, res) => classController.listAll(req, res),
 )
 
+classRouter.get(
+    '/avaiables',
+    ensureAuthenticated,
+    (req, res) => classController.listAvaiables(req, res),
+)
+
+classRouter.get(
+    '/:id',
+    ensureAuthenticated,
+    (req, res) => classController.findById(req, res),
+)
+
 export { classRouter }

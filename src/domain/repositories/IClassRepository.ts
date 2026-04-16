@@ -14,4 +14,5 @@ export interface IClassRepository {
     findById(id: string): Promise<Class | null>;
     findByName(name: string): Promise<Class | null>;
     listAll(): Promise<Class[]>;
+    listAvaiable(): Promise<Class[]>;
 }
