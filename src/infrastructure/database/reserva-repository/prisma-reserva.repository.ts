@@ -37,7 +37,10 @@ export class PrismaReservaRepository implements ReservaRepository {
     periodo: string;
     semestre: string;
     status: string;
+    justificativa?: string | null;
     createdAt: Date;
+    professor?: { name: string } | null;
+    sala?: { nome: string } | null;
   }): Reserva {
     return new Reserva({
       id: reserva.id,
@@ -48,7 +51,10 @@ export class PrismaReservaRepository implements ReservaRepository {
       periodo: reserva.periodo,
       semestre: reserva.semestre,
       status: this.parseStatus(reserva.status),
-      createdAt: reserva.createdAt
+      justificativa: reserva.justificativa ?? undefined,
+      createdAt: reserva.createdAt,
+      professorNome: reserva.professor?.name,
+      salaNome: reserva.sala?.nome,
     });
   }
 
@@ -82,8 +88,15 @@ export class PrismaReservaRepository implements ReservaRepository {
   async findAll(): Promise<Reserva[]> {
     const reservas = await prisma.reserva.findMany({
       include: {
-        professor: true,
-        sala: true
+        professor: {
+          select: { name: true }
+        },
+        sala: {
+          select: { nome: true }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
       }
     });
 
@@ -97,7 +110,12 @@ export class PrismaReservaRepository implements ReservaRepository {
         professorId
       },
       include: {
-        sala: true
+        sala: {
+          select: { nome: true }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
       }
     });
 
@@ -116,7 +134,9 @@ export class PrismaReservaRepository implements ReservaRepository {
         salaId,
         data,
         horario,
-        status: ReservaStatus.APROVADA
+        status: {
+          in: [ReservaStatus.APROVADA, ReservaStatus.AGUARDANDO]
+        }
       }
     });
 
@@ -127,10 +147,10 @@ export class PrismaReservaRepository implements ReservaRepository {
     return this.toDomain(reserva);
   }
 
-
   async updateStatus(
     id: string,
-    status: ReservaStatus
+    status: ReservaStatus,
+    justificativa?: string
   ): Promise<Reserva> {
 
     const reservaAtualizada = await prisma.reserva.update({
@@ -138,7 +158,16 @@ export class PrismaReservaRepository implements ReservaRepository {
         id
       },
       data: {
-        status
+        status,
+        ...(justificativa !== undefined ? { justificativa } : {})
+      },
+      include: {
+        professor: {
+          select: { name: true }
+        },
+        sala: {
+          select: { nome: true }
+        }
       }
     });
 
