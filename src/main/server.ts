@@ -51,8 +51,10 @@ app.use('/api/reservas', ensureAuthenticated, reservaRoutes);
 // ── Salas (listagem para o frontend) ─────────────────────────────────────────
 app.get('/api/salas', ensureAuthenticated, async (_req, res) => {
   try {
-    const salas = await prismaClient.sala.findMany({ orderBy: { nome: 'asc' } });
-    res.json(salas);
+    const classes = await prismaClient.class.findMany({
+      orderBy: { name: 'asc' },
+    });
+    res.json(classes);
   } catch {
     res.status(500).json({ message: 'Erro ao buscar salas.' });
   }

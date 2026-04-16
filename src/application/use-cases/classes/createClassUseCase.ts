@@ -4,12 +4,12 @@ import { IClassRepository } from '@domain/repositories/IClassRepository';
 
 //Validar dados 
 const createClassSchema = z.object({
-    name: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres.'),
-    description: z.string().nullable().optional(),
-    capacity: z.number().int('Capacidade deve ser um número inteiro').min(1, 'Capacidade deve ser pelo menos 1.'),
-    type: z.enum(['LABORATORIO', 'SALA', 'AUDITORIO'], {
-        errorMap: () => ({message: 'Espaço deve ser LABORATORIO, SALA ou AUDITORIO'}),
-    }),
+  name: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres.'),
+  description: z.string().nullable().optional(),
+  capacity: z.coerce.number().int('Capacidade deve ser um número inteiro').min(1, 'Capacidade deve ser pelo menos 1.'),
+  type: z.enum(['LABORATORIO', 'SALA', 'AUDITORIO'], {
+    errorMap: () => ({ message: 'Espaço deve ser LABORATORIO, SALA ou AUDITORIO' }),
+  }),
 });
 
 //Dados que entram no Use Case
