@@ -1,5 +1,14 @@
 import { Reserva } from './reserva.entity'
 
+export interface CalendarioFiltros {
+  mes: number
+  ano: number
+  classId?: string
+  periodo?: string
+  semestre?: string
+  incluirAguardando?: boolean
+}
+
 export interface ReservaRepository {
   create(reserva: Reserva): Promise<Reserva>
 
@@ -10,7 +19,8 @@ export interface ReservaRepository {
   findConflito(
     salaId: string,
     data: Date,
-    horario: string
+    horarioInicio: string,
+    horarioFim: string
   ): Promise<Reserva | null>
 
   updateStatus(
@@ -18,4 +28,6 @@ export interface ReservaRepository {
     status: string,
     justificativa?: string
   ): Promise<Reserva>
+
+  findByCalendario(filtros: CalendarioFiltros): Promise<Reserva[]>
 }
