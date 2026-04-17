@@ -6,6 +6,9 @@ export class Reserva {
   salaId: string
   data: Date
   horario: string
+  horarioInicio: string
+  horarioFim: string
+  turma: string
   periodo: string
   semestre: string
   status: ReservaStatus
@@ -22,6 +25,9 @@ export class Reserva {
     salaId: string
     data: Date
     horario: string
+    horarioInicio: string
+    horarioFim: string
+    turma: string
     periodo: string
     semestre: string
     status?: ReservaStatus
@@ -35,6 +41,9 @@ export class Reserva {
     this.salaId = props.salaId
     this.data = props.data
     this.horario = props.horario
+    this.horarioInicio = props.horarioInicio
+    this.horarioFim = props.horarioFim
+    this.turma = props.turma
     this.periodo = props.periodo
     this.semestre = props.semestre
     this.status = props.status ?? ReservaStatus.AGUARDANDO

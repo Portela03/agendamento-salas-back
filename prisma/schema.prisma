@@ -67,6 +67,9 @@ model Reserva {
   classId       String
   data          DateTime
   horario       String
+  horarioInicio String    @default("") @map("horario_inicio")
+  horarioFim    String    @default("") @map("horario_fim")
+  turma         String    @default("")
   periodo       String
   semestre      String
   status        String
