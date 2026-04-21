@@ -43,4 +43,11 @@ reservaRoutes.patch(
   (req, res) => reservaController.rejeitar(req, res)
 );
 
+// Todos autenticados: visualizar calendário de disponibilidade
+reservaRoutes.get(
+  "/calendario",
+  ensureAuthenticated,
+  (req, res) => reservaController.calendario(req, res)
+);
+
 export { reservaRoutes };
