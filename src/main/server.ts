@@ -6,6 +6,7 @@ import { userRouter } from '../infrastructure/http/routes/userRoutes';
 import { classRouter} from '../infrastructure/http/routes/classRoutes';
 import { bootstrapFirstCoordinator } from './bootstrapFirstCoordinator';
 import { reservaRoutes } from '../infrastructure/http/routes/reservaRoutes';
+import { notificacaoRoutes } from '../infrastructure/http/routes/notificacaoRoutes';
 import { ensureAuthenticated } from '../infrastructure/http/middlewares/authMiddleware';
 import { prismaClient } from '../infrastructure/database/prisma/prismaClient';
 
@@ -47,6 +48,7 @@ app.use('/api/users', userRouter);
 app.use('/api/class', classRouter);
 
 app.use('/api/reservas', ensureAuthenticated, reservaRoutes);
+app.use('/api/notificacoes', ensureAuthenticated, notificacaoRoutes);
 
 // ── Salas (listagem para o frontend) ─────────────────────────────────────────
 app.get('/api/salas', ensureAuthenticated, async (_req, res) => {

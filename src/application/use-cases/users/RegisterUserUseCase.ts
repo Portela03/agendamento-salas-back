@@ -2,6 +2,7 @@ import { hash } from 'bcrypt';
 import { z } from 'zod';
 import { UserRole } from '../../../domain/entities/User';
 import { IUserRepository } from '../../../domain/repositories/IUserRepository';
+import { INotificationService } from '../../notification/notification.service.interface';
 
 const registerUserSchema = z.object({
   name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres.'),
@@ -31,7 +32,10 @@ export interface RegisterUserResponse {
 }
 
 export class RegisterUserUseCase {
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(
+    private readonly userRepository: IUserRepository,
+    private readonly notificationService?: INotificationService,
+  ) {}
 
   async execute(request: RegisterUserRequest): Promise<RegisterUserResponse> {
     const { name, email, password, role } = registerUserSchema.parse(request);
@@ -50,6 +54,8 @@ export class RegisterUserUseCase {
       role,
       status: 'PENDENTE',
     });
+
+    void this.notificationService?.notifyNewUser(user);
 
     return {
       user: {

@@ -1,5 +1,6 @@
 import { Reserva } from "../../domain/reserva/reserva.entity";
 import { ReservaRepository } from "../../domain/reserva/reserva-repository.interface";
+import { INotificationService } from "../notification/notification.service.interface";
 
 interface CriarReservaRequest {
   professorId: string
@@ -45,7 +46,10 @@ function isSameDate(a: Date, b: Date): boolean {
 }
 
 export class CriarReservaUseCase {
-  constructor(private reservaRepository: ReservaRepository) {}
+  constructor(
+    private reservaRepository: ReservaRepository,
+    private notificationService?: INotificationService,
+  ) {}
 
   async execute(data: CriarReservaRequest) {
     const hoje = new Date();
@@ -104,6 +108,8 @@ export class CriarReservaUseCase {
       semestre: inferSemestre(dataReserva)
     });
 
-    return await this.reservaRepository.create(reserva);
+    const created = await this.reservaRepository.create(reserva);
+    void this.notificationService?.notifyNewReservation(created);
+    return created;
   }
 }

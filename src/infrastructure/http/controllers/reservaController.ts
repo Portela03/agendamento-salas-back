@@ -8,6 +8,7 @@ import { ListarReservasProfessorUseCase } from "../../../application/reserva-use
 import { AprovarReservaUseCase } from "../../../application/reserva-usecases/aprovar-reserva.usecase";
 import { RejeitarReservaUseCase } from "../../../application/reserva-usecases/rejeitar-reserva.usecase";
 import { ListarReservasCalendarioUseCase } from "../../../application/reserva-usecases/listar-reservas-calendario.usecase";
+import { notificationService } from "../../notification/notification.singleton";
 
 const reservaRepository = new PrismaReservaRepository();
 
@@ -23,7 +24,7 @@ export class ReservaController {
       }
 
       const professorId = request.user!.id;
-      const useCase = new CriarReservaUseCase(reservaRepository);
+      const useCase = new CriarReservaUseCase(reservaRepository, notificationService);
 
       const reserva = await useCase.execute({
         professorId,
@@ -74,7 +75,7 @@ export class ReservaController {
     try {
       const { id } = request.params;
 
-      const useCase = new AprovarReservaUseCase(reservaRepository);
+      const useCase = new AprovarReservaUseCase(reservaRepository, notificationService);
       const reserva = await useCase.execute(id);
 
       return response.json(reserva);
@@ -95,7 +96,7 @@ export class ReservaController {
         return response.status(400).json({ message: 'A justificativa é obrigatória.' });
       }
 
-      const useCase = new RejeitarReservaUseCase(reservaRepository);
+      const useCase = new RejeitarReservaUseCase(reservaRepository, notificationService);
       const reserva = await useCase.execute(id, String(justificativa));
 
       return response.json(reserva);

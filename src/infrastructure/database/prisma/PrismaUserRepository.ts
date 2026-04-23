@@ -20,6 +20,14 @@ export class PrismaUserRepository implements IUserRepository {
     return raw ? this.toDomain(raw) : null;
   }
 
+  async findAllByRole(role: UserRole): Promise<User[]> {
+    const raws = await this.prisma.user.findMany({
+      where: { role },
+      orderBy: { createdAt: 'asc' },
+    });
+    return raws.map((raw) => this.toDomain(raw));
+  }
+
   async listPendingUsers(): Promise<User[]> {
     const raws = await this.prisma.user.findMany({
       where: { status: 'PENDENTE' },
