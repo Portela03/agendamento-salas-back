@@ -137,10 +137,15 @@ async function run() {
   // ── 8. Professor cria reserva ─────────────────────────────────────────────
   console.log('\n[8] Professor cria reserva');
 
-  // Data amanhã às 10h
+  // Data: daqui a 7 dias + hora aleatória para evitar conflito com execuções anteriores
   const amanha = new Date();
-  amanha.setDate(amanha.getDate() + 1);
+  amanha.setDate(amanha.getDate() + 7 + Math.floor(Math.random() * 20));
   amanha.setHours(12, 0, 0, 0);
+
+  // Horário aleatório entre 06h e 22h em slots de 2h para garantir não conflito
+  const startHour = 6 + (Math.floor(Math.random() * 8) * 2); // 6,8,10,12,14,16,18,20
+  const horarioInicio = `${String(startHour).padStart(2, '0')}:00`;
+  const horarioFim    = `${String(startHour + 2).padStart(2, '0')}:00`;
 
   let reservaId = null;
   if (salaDisponivel) {
@@ -149,8 +154,8 @@ async function run() {
     const criarReserva = await req('POST', '/reservas', {
       classId: salaDisponivel.id,
       data: amanha.toISOString(),
-      horarioInicio: '10:00',
-      horarioFim: '12:00',
+      horarioInicio,
+      horarioFim,
       turma: 'ADS-3A',
     }, profToken);
     ok('HTTP 201', criarReserva.status === 201, `status=${criarReserva.status} msg=${criarReserva.data?.message}`);

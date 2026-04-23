@@ -30,7 +30,15 @@ export class EmailService {
 
     const from = process.env.SMTP_FROM ?? '"Agendamento de Salas" <no-reply@agendamentosalas.local>';
     try {
-      await transporter.sendMail({ from, to, subject, html });
+      await transporter.sendMail({
+        from,
+        to,
+        subject,
+        // textEncoding: 'base64' força o corpo em base64, garantindo
+        // que acentos e emojis sejam entregues corretamente em qualquer cliente.
+        textEncoding: 'base64',
+        html,
+      });
       console.log(`[EmailService] ✅ Email enviado para: ${Array.isArray(to) ? to.join(', ') : to} | Assunto: ${subject}`);
     } catch (err) {
       // Log the error but do not crash the request — email is non-critical

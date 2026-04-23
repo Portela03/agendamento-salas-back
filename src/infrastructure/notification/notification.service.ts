@@ -1,9 +1,16 @@
-import { INotificationService } from '../../application/notification/notification.service.interface';
+﻿import { INotificationService } from '../../application/notification/notification.service.interface';
 import { User } from '../../domain/entities/User';
 import { INotificacaoRepository } from '../../domain/notificacao/notificacao-repository.interface';
 import { IUserRepository } from '../../domain/repositories/IUserRepository';
 import { Reserva } from '../../domain/reserva/reserva.entity';
 import { EmailService } from '../email/email.service';
+import {
+  emailNovoUsuario,
+  emailUsuarioAprovado,
+  emailNovaReserva,
+  emailReservaAprovada,
+  emailReservaRejeitada,
+} from '../email/email.templates';
 
 export class NotificationService implements INotificationService {
   constructor(
@@ -12,11 +19,11 @@ export class NotificationService implements INotificationService {
     private readonly emailService: EmailService,
   ) {}
 
-  // ── New user registered — notify all coordinators ─────────────────────────
+  // â”€â”€ New user registered â€” notify all coordinators â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async notifyNewUser(user: User): Promise<void> {
     const coordinators = await this.userRepository.findAllByRole('COORDENADOR');
-    const message = `Novo usuário "${user.name}" (${user.role}) aguarda aprovação.`;
+    const message = `Novo usuÃ¡rio "${user.name}" aguarda aprovaÃ§Ã£o de cadastro.`;
 
     await Promise.all(
       coordinators.map(async (coord) => {
@@ -27,19 +34,17 @@ export class NotificationService implements INotificationService {
         });
         await this.emailService.sendMail(
           coord.email,
-          '[Agendamento de Salas] Novo usuário aguardando aprovação',
-          `<p>Olá, <strong>${coord.name}</strong>!</p>
-           <p>O usuário <strong>${user.name}</strong> (${user.email}) se registrou como <strong>${user.role}</strong> e aguarda sua aprovação.</p>
-           <p>Acesse o sistema para aprovar ou recusar o cadastro.</p>`,
+          'Novo cadastro aguardando aprovaÃ§Ã£o',
+          emailNovoUsuario(coord, user),
         );
       }),
     );
   }
 
-  // ── User approved — notify the professor ─────────────────────────────────
+  // â”€â”€ User approved â€” notify the professor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async notifyUserApproved(user: User): Promise<void> {
-    const message = 'Seu cadastro foi aprovado! Você já pode acessar o sistema.';
+    const message = 'Seu cadastro foi aprovado! VocÃª jÃ¡ pode acessar o sistema.';
 
     await this.notificacaoRepository.create({
       userId: user.id,
@@ -49,21 +54,19 @@ export class NotificationService implements INotificationService {
 
     await this.emailService.sendMail(
       user.email,
-      '[Agendamento de Salas] Cadastro aprovado!',
-      `<p>Olá, <strong>${user.name}</strong>!</p>
-       <p>Seu cadastro no sistema de agendamento de salas foi <strong>aprovado</strong>.</p>
-       <p>Você já pode fazer login e solicitar reservas de salas.</p>`,
+      'Seu acesso foi liberado!',
+      emailUsuarioAprovado(user),
     );
   }
 
-  // ── New reservation — notify all coordinators ────────────────────────────
+  // â”€â”€ New reservation â€” notify all coordinators â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async notifyNewReservation(reserva: Reserva): Promise<void> {
     const professor = await this.userRepository.findById(reserva.professorId);
     const professorNome = professor?.name ?? reserva.professorNome ?? 'Professor';
     const salaNome = reserva.salaNome ?? reserva.salaId;
     const dataFormatada = new Date(reserva.data).toLocaleDateString('pt-BR');
-    const message = `Nova solicitação de reserva de "${salaNome}" por ${professorNome} em ${dataFormatada} (${reserva.horario}).`;
+    const message = `Nova solicitaÃ§Ã£o de reserva da sala "${salaNome}" por ${professorNome} em ${dataFormatada} (${reserva.horario}).`;
 
     const coordinators = await this.userRepository.findAllByRole('COORDENADOR');
 
@@ -76,21 +79,20 @@ export class NotificationService implements INotificationService {
         });
         await this.emailService.sendMail(
           coord.email,
-          '[Agendamento de Salas] Nova solicitação de reserva',
-          `<p>Olá, <strong>${coord.name}</strong>!</p>
-           <p>O professor <strong>${professorNome}</strong> solicitou reserva da sala <strong>${salaNome}</strong>:</p>
-           <ul>
-             <li><strong>Data:</strong> ${dataFormatada}</li>
-             <li><strong>Horário:</strong> ${reserva.horario}</li>
-             <li><strong>Turma:</strong> ${reserva.turma}</li>
-           </ul>
-           <p>Acesse o sistema para aprovar ou rejeitar a solicitação.</p>`,
+          'Nova solicitaÃ§Ã£o de reserva de sala',
+          emailNovaReserva(coord, {
+            professorNome,
+            salaNome,
+            data: dataFormatada,
+            horario: reserva.horario,
+            turma: reserva.turma,
+          }),
         );
       }),
     );
   }
 
-  // ── Reservation approved — notify the professor ──────────────────────────
+  // â”€â”€ Reservation approved â€” notify the professor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async notifyReservaAprovada(reserva: Reserva): Promise<void> {
     const professor = await this.userRepository.findById(reserva.professorId);
@@ -108,19 +110,17 @@ export class NotificationService implements INotificationService {
 
     await this.emailService.sendMail(
       professor.email,
-      '[Agendamento de Salas] Reserva aprovada!',
-      `<p>Olá, <strong>${professor.name}</strong>!</p>
-       <p>Sua solicitação de reserva foi <strong style="color:green">APROVADA</strong>.</p>
-       <ul>
-         <li><strong>Sala:</strong> ${salaNome}</li>
-         <li><strong>Data:</strong> ${dataFormatada}</li>
-         <li><strong>Horário:</strong> ${reserva.horario}</li>
-         <li><strong>Turma:</strong> ${reserva.turma}</li>
-       </ul>`,
+      'Sua reserva foi aprovada!',
+      emailReservaAprovada(professor, {
+        salaNome,
+        data: dataFormatada,
+        horario: reserva.horario,
+        turma: reserva.turma,
+      }),
     );
   }
 
-  // ── Reservation rejected — notify the professor ──────────────────────────
+  // â”€â”€ Reservation rejected â€” notify the professor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async notifyReservaRejeitada(reserva: Reserva): Promise<void> {
     const professor = await this.userRepository.findById(reserva.professorId);
@@ -139,16 +139,14 @@ export class NotificationService implements INotificationService {
 
     await this.emailService.sendMail(
       professor.email,
-      '[Agendamento de Salas] Reserva rejeitada',
-      `<p>Olá, <strong>${professor.name}</strong>!</p>
-       <p>Sua solicitação de reserva foi <strong style="color:red">REJEITADA</strong>.</p>
-       <ul>
-         <li><strong>Sala:</strong> ${salaNome}</li>
-         <li><strong>Data:</strong> ${dataFormatada}</li>
-         <li><strong>Horário:</strong> ${reserva.horario}</li>
-         <li><strong>Turma:</strong> ${reserva.turma}</li>
-       </ul>
-       <p><strong>Motivo:</strong> ${justificativa}</p>`,
+      'SolicitaÃ§Ã£o de reserva nÃ£o aprovada',
+      emailReservaRejeitada(professor, {
+        salaNome,
+        data: dataFormatada,
+        horario: reserva.horario,
+        turma: reserva.turma,
+        justificativa,
+      }),
     );
   }
 }
