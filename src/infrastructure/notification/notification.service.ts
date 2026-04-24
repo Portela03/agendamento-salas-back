@@ -1,4 +1,8 @@
+<<<<<<< Updated upstream
 ﻿import { INotificationService } from '../../application/notification/notification.service.interface';
+=======
+import { INotificationService } from '../../application/notification/notification.service.interface';
+>>>>>>> Stashed changes
 import { User } from '../../domain/entities/User';
 import { INotificacaoRepository } from '../../domain/notificacao/notificacao-repository.interface';
 import { IUserRepository } from '../../domain/repositories/IUserRepository';
@@ -23,7 +27,11 @@ export class NotificationService implements INotificationService {
 
   async notifyNewUser(user: User): Promise<void> {
     const coordinators = await this.userRepository.findAllByRole('COORDENADOR');
+<<<<<<< Updated upstream
     const message = `Novo usuÃ¡rio "${user.name}" aguarda aprovaÃ§Ã£o de cadastro.`;
+=======
+    const message = `Novo usuário "${user.name}" aguarda Aprovação de cadastro.`;
+>>>>>>> Stashed changes
 
     await Promise.all(
       coordinators.map(async (coord) => {
@@ -34,7 +42,11 @@ export class NotificationService implements INotificationService {
         });
         await this.emailService.sendMail(
           coord.email,
+<<<<<<< Updated upstream
           'Novo cadastro aguardando aprovaÃ§Ã£o',
+=======
+          'Novo cadastro aguardando Aprovação',
+>>>>>>> Stashed changes
           emailNovoUsuario(coord, user),
         );
       }),
@@ -66,7 +78,11 @@ export class NotificationService implements INotificationService {
     const professorNome = professor?.name ?? reserva.professorNome ?? 'Professor';
     const salaNome = reserva.salaNome ?? reserva.salaId;
     const dataFormatada = new Date(reserva.data).toLocaleDateString('pt-BR');
+<<<<<<< Updated upstream
     const message = `Nova solicitaÃ§Ã£o de reserva da sala "${salaNome}" por ${professorNome} em ${dataFormatada} (${reserva.horario}).`;
+=======
+    const message = `Nova solicitação de reserva da sala "${salaNome}" por ${professorNome} em ${dataFormatada} (${reserva.horario}).`;
+>>>>>>> Stashed changes
 
     const coordinators = await this.userRepository.findAllByRole('COORDENADOR');
 
@@ -79,7 +95,11 @@ export class NotificationService implements INotificationService {
         });
         await this.emailService.sendMail(
           coord.email,
+<<<<<<< Updated upstream
           'Nova solicitaÃ§Ã£o de reserva de sala',
+=======
+          'Nova solicitação de reserva de sala',
+>>>>>>> Stashed changes
           emailNovaReserva(coord, {
             professorNome,
             salaNome,
@@ -139,7 +159,11 @@ export class NotificationService implements INotificationService {
 
     await this.emailService.sendMail(
       professor.email,
+<<<<<<< Updated upstream
       'SolicitaÃ§Ã£o de reserva nÃ£o aprovada',
+=======
+      'solicitação de reserva nÃ£o aprovada',
+>>>>>>> Stashed changes
       emailReservaRejeitada(professor, {
         salaNome,
         data: dataFormatada,

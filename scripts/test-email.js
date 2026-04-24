@@ -1,4 +1,8 @@
+<<<<<<< Updated upstream
 ﻿/**
+=======
+/**
+>>>>>>> Stashed changes
  * Testa o envio de email diretamente via SMTP.
  * Roda sem o servidor: node scripts/test-email.js
  */
@@ -47,7 +51,11 @@ const html = `<!DOCTYPE html>
           <td style="background:#ffffff;padding:36px 40px 28px;">
             <p style="margin:0 0 20px;font-size:16px;color:#334155;">OlÃ¡, <strong>JoÃ£o</strong>!</p>
             <p style="margin:0 0 20px;font-size:15px;color:#475569;line-height:1.6;">
+<<<<<<< Updated upstream
               Sua solicitaÃ§Ã£o de reserva foi <strong style="color:#16a34a;">aprovada</strong> pelo coordenador. Tudo certo para sua aula!
+=======
+              Sua solicitação de reserva foi <strong style="color:#16a34a;">aprovada</strong> pelo coordenador. Tudo certo para sua aula!
+>>>>>>> Stashed changes
             </p>
             <table width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;">
               <tr><td style="padding:8px 0;border-bottom:1px solid #f1f5f9;">
@@ -68,7 +76,11 @@ const html = `<!DOCTYPE html>
               </td></tr>
             </table>
             <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px 20px;margin:20px 0;">
+<<<<<<< Updated upstream
               <p style="margin:0;font-size:14px;color:#166534;">ðŸ“Œ Lembre-se de comparecer no horÃ¡rio reservado.</p>
+=======
+              <p style="margin:0;font-size:14px;color:#166534;">📌 Lembre-se de comparecer no horÃ¡rio reservado.</p>
+>>>>>>> Stashed changes
             </div>
           </td>
         </tr>
