@@ -30,7 +30,8 @@ model User {
   approvedAt DateTime?  @map("approved_at")
   createdAt  DateTime   @default(now()) @map("created_at")
   updatedAt  DateTime   @updatedAt @map("updated_at")
-  reservas   Reserva[]
+  reservas      Reserva[]
+  notificacoes  Notificacao[]
 
   @@map("users")
 }
@@ -78,4 +79,25 @@ model Reserva {
 
   professor User  @relation(fields: [professorId], references: [id])
   class     Class @relation(fields: [classId], references: [id])
+}
+
+enum NotificacaoType {
+  NOVO_USUARIO
+  USUARIO_APROVADO
+  NOVA_RESERVA
+  RESERVA_APROVADA
+  RESERVA_REJEITADA
+}
+
+model Notificacao {
+  id        String          @id @default(uuid())
+  userId    String          @map("user_id")
+  message   String
+  type      NotificacaoType
+  read      Boolean         @default(false)
+  createdAt DateTime        @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("notificacoes")
 }

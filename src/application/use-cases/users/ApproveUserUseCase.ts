@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { IUserRepository } from '../../../domain/repositories/IUserRepository';
+import { INotificationService } from '../../notification/notification.service.interface';
 
 const approveSchema = z.object({
   userId: z.string().uuid('ID de usuário inválido.'),
@@ -21,7 +22,10 @@ export interface ApproveUserResponse {
 }
 
 export class ApproveUserUseCase {
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(
+    private readonly userRepository: IUserRepository,
+    private readonly notificationService?: INotificationService,
+  ) {}
 
   async execute(request: ApproveUserRequest): Promise<ApproveUserResponse> {
     const { userId } = approveSchema.parse(request);
@@ -30,6 +34,8 @@ export class ApproveUserUseCase {
     if (!user) {
       throw new Error('Usuário não encontrado.');
     }
+
+    void this.notificationService?.notifyUserApproved(user);
 
     return {
       user: {

@@ -6,6 +6,7 @@ import { ListPendingUsersUseCase } from '../../../application/use-cases/users/Li
 import { ApproveUserUseCase } from '../../../application/use-cases/users/ApproveUserUseCase';
 import { prismaClient } from '../../database/prisma/prismaClient';
 import { PrismaUserRepository } from '../../database/prisma/PrismaUserRepository';
+import { notificationService } from '../../notification/notification.singleton';
 
 /**
  * UserController — handles HTTP concerns and delegates to CreateUserUseCase.
@@ -14,7 +15,7 @@ export class UserController {
   async register(req: Request, res: Response): Promise<void> {
     try {
       const userRepository = new PrismaUserRepository(prismaClient);
-      const registerUser = new RegisterUserUseCase(userRepository);
+      const registerUser = new RegisterUserUseCase(userRepository, notificationService);
 
       const result = await registerUser.execute(req.body);
 
@@ -77,7 +78,7 @@ export class UserController {
   async approve(req: Request, res: Response): Promise<void> {
     try {
       const userRepository = new PrismaUserRepository(prismaClient);
-      const approveUser = new ApproveUserUseCase(userRepository);
+      const approveUser = new ApproveUserUseCase(userRepository, notificationService);
 
       const result = await approveUser.execute({ userId: req.params.id });
 
