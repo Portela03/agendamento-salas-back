@@ -105,7 +105,24 @@ export class UserController {
   async reject(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      await prismaClient.user.delete({ where: { id } });
+
+      // Verificar se o usuário existe antes de tentar deletar
+      const user = await prismaClient.user.findUnique({ where: { id } });
+      if (!user) {
+        res.status(404).json({ message: 'Usuário não encontrado.' });
+        return;
+      }
+
+      // Deletar dependências em transação para evitar violação de foreign key
+      await prismaClient.$transaction(async (tx) => {
+        // Deletar notificações vinculadas ao usuário
+        await tx.notificacao.deleteMany({ where: { userId: id } });
+        // Deletar reservas vinculadas ao usuário (caso existam)
+        await tx.reserva.deleteMany({ where: { professorId: id } });
+        // Agora deletar o usuário
+        await tx.user.delete({ where: { id } });
+      });
+
       res.status(200).json({ message: 'Acesso recusado e registro removido.' });
     } catch (error) {
       if (error instanceof Error && error.message.includes('Record to delete does not exist')) {
