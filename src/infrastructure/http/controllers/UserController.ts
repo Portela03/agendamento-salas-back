@@ -101,4 +101,18 @@ export class UserController {
       res.status(500).json({ message: 'Erro interno do servidor.' });
     }
   }
+
+  async reject(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      await prismaClient.user.delete({ where: { id } });
+      res.status(200).json({ message: 'Acesso recusado e registro removido.' });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('Record to delete does not exist')) {
+        res.status(404).json({ message: 'Usuário não encontrado.' });
+        return;
+      }
+      res.status(500).json({ message: 'Erro interno do servidor.' });
+    }
+  }
 }

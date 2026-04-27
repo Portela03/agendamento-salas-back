@@ -34,4 +34,11 @@ userRouter.patch(
   (req, res) => userController.approve(req, res),
 );
 
+userRouter.delete(
+  '/:id/reject',
+  ensureAuthenticated,
+  ensureRole('COORDENADOR'),
+  (req, res) => userController.reject(req, res),
+);
+
 export { userRouter };
