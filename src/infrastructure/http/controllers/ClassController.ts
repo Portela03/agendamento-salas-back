@@ -7,6 +7,7 @@ import { FindByIdClassUseCase } from "../../../application/use-cases/classes/fin
 import { FindByNameClassUseCase } from "../../../application/use-cases/classes/findByNameClassUseCase";
 import { ListAllClassUseCase } from "../../../application/use-cases/classes/listAllClassUseCase";
 import { ListAvaiablesClassUseCase } from "../../../application/use-cases/classes/listAvaiablesClassUseCase";
+import { DeleteClassUseCase } from '../../../application/use-cases/classes/deleteClassUseCase'
 
 import { prismaClient } from "../../../infrastructure/database/prisma/prismaClient";
 import { PrismaClassRepository } from "../../../infrastructure/database/prisma/PrismaClassRepository";
@@ -125,4 +126,19 @@ export class ClassController {
             res.status(500).json({ message: 'Erro interno do servidor.' });
         }
     }   
+
+    async delete(req: Request, res: Response): Promise<void> {
+        try{
+            const classRepository = new PrismaClassRepository(prismaClient);
+            const deleteClass = new DeleteClassUseCase(classRepository);
+
+            const id = req.params.id;
+
+            const result = await deleteClass.execute(id);
+            res.status(204).json(result);
+        } catch {
+            res.status(500).json({ message: 'Erro interno do servidor.' });
+        }
+       
+    }
 }

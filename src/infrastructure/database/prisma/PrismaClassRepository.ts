@@ -51,6 +51,10 @@ export class PrismaClassRepository implements IClassRepository {
         return raws.map((raw) => this.toDomain(raw))
     }
 
+    async delete(id:string): Promise<void> {
+        await this.prisma.class.delete({ where: { id }, });
+    }
+
     private toDomain(raw: {
         id: string;
         name: string;

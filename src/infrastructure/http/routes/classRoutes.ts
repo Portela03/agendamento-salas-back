@@ -35,4 +35,10 @@ classRouter.get(
     (req, res) => classController.findById(req, res),
 )
 
+classRouter.delete(
+    '/:id',
+    ensureAuthenticated,
+    (req, res) => classController.delete(req, res),
+)
+
 export { classRouter }

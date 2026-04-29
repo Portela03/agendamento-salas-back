@@ -78,7 +78,7 @@ model Reserva {
   createdAt     DateTime  @default(now())
 
   professor User  @relation(fields: [professorId], references: [id])
-  class     Class @relation(fields: [classId], references: [id])
+  class     Class @relation(fields: [classId], references: [id], onDelete: Cascade)
 }
 
 enum NotificacaoType {
