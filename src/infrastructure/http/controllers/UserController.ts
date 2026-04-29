@@ -12,6 +12,14 @@ import { notificationService } from '../../notification/notification.singleton';
  * UserController — handles HTTP concerns and delegates to CreateUserUseCase.
  */
 export class UserController {
+  private sanitizeUser(user: {
+    password: string;
+    [key: string]: unknown;
+  }) {
+    const { password: _, ...publicUser } = user;
+    return publicUser;
+  }
+
   async register(req: Request, res: Response): Promise<void> {
     try {
       const userRepository = new PrismaUserRepository(prismaClient);
@@ -130,6 +138,108 @@ export class UserController {
         return;
       }
       res.status(500).json({ message: 'Erro interno do servidor.' });
+    }
+  }
+
+  async listAll(_req: Request, res: Response): Promise<void> {
+    try {
+      const users = await prismaClient.user.findMany({
+        orderBy: { name: 'asc' },
+      });
+
+      res.status(200).json({
+        users: users.map((user) => this.sanitizeUser(user)),
+      });
+    } catch {
+      res.status(500).json({ message: 'Erro interno do servidor.' });
+    }
+  }
+
+  async update(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const { name, email, role, status } = req.body;
+
+      const normalizedRole = role === 'PROFESSOR' || role === 'COORDENADOR' ? role : undefined;
+      const normalizedStatus = status === 'PENDENTE' || status === 'APROVADO' ? status : undefined;
+
+      const existingUser = await prismaClient.user.findUnique({ where: { id } });
+      if (!existingUser) {
+        res.status(404).json({ message: 'Usuário não encontrado.' });
+        return;
+      }
+
+      const updatedUser = await prismaClient.user.update({
+        where: { id },
+        data: {
+          ...(typeof name === 'string' ? { name } : {}),
+          ...(typeof email === 'string' ? { email } : {}),
+          ...(normalizedRole ? { role: normalizedRole } : {}),
+          ...(normalizedStatus
+            ? {
+                status: normalizedStatus,
+                approvedAt: normalizedStatus === 'APROVADO' ? existingUser.approvedAt ?? new Date() : null,
+              }
+            : {}),
+        },
+      });
+
+      res.status(200).json({ user: this.sanitizeUser(updatedUser) });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('Unique constraint')) {
+        res.status(409).json({ message: 'Já existe um usuário cadastrado com este e-mail.' });
+        return;
+      }
+
+      res.status(500).json({ message: 'Erro ao atualizar usuário.' });
+    }
+  }
+
+  async toggleStatus(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      const user = await prismaClient.user.findUnique({ where: { id } });
+      if (!user) {
+        res.status(404).json({ message: 'Usuário não encontrado.' });
+        return;
+      }
+
+      const nextStatus = user.status === 'APROVADO' ? 'PENDENTE' : 'APROVADO';
+
+      const updatedUser = await prismaClient.user.update({
+        where: { id },
+        data: {
+          status: nextStatus,
+          approvedAt: nextStatus === 'APROVADO' ? new Date() : null,
+        },
+      });
+
+      res.status(200).json({ user: this.sanitizeUser(updatedUser) });
+    } catch {
+      res.status(500).json({ message: 'Erro ao alterar status do usuário.' });
+    }
+  }
+
+  async remove(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      const user = await prismaClient.user.findUnique({ where: { id } });
+      if (!user) {
+        res.status(404).json({ message: 'Usuário não encontrado.' });
+        return;
+      }
+
+      await prismaClient.$transaction(async (tx) => {
+        await tx.notificacao.deleteMany({ where: { userId: id } });
+        await tx.reserva.deleteMany({ where: { professorId: id } });
+        await tx.user.delete({ where: { id } });
+      });
+
+      res.status(200).json({ message: 'Usuário removido com sucesso.' });
+    } catch {
+      res.status(500).json({ message: 'Erro ao remover usuário.' });
     }
   }
 }

@@ -41,4 +41,32 @@ userRouter.delete(
   (req, res) => userController.reject(req, res),
 );
 
+userRouter.get(
+  '/',
+  ensureAuthenticated,
+  ensureRole('COORDENADOR'),
+  (req, res) => userController.listAll(req, res),
+);
+
+userRouter.put(
+  '/:id',
+  ensureAuthenticated,
+  ensureRole('COORDENADOR'),
+  (req, res) => userController.update(req, res),
+);
+
+userRouter.patch(
+  '/:id/status',
+  ensureAuthenticated,
+  ensureRole('COORDENADOR'),
+  (req, res) => userController.toggleStatus(req, res),
+);
+
+userRouter.delete(
+  '/:id',
+  ensureAuthenticated,
+  ensureRole('COORDENADOR'),
+  (req, res) => userController.remove(req, res),
+);
+
 export { userRouter };
