@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { ResetPasswordData, IResetPasswordRepository } from '@domain/repositories/IResetPasswordRepository';
-import { ResetPassword } from '@domain/entities/ResetPassword';
+import { ResetPasswordData, IResetPasswordRepository } from '../../../domain/repositories/IResetPasswordRepository';
+import { ResetPassword } from '../../../domain/entities/ResetPassword';
 
 export class PrismaResetSenhaRepository implements IResetPasswordRepository {
     constructor(private readonly prisma: PrismaClient) {}

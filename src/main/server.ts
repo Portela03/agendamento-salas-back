@@ -4,6 +4,7 @@ import express from 'express';
 import { authRouter } from '../infrastructure/http/routes/authRoutes';
 import { userRouter } from '../infrastructure/http/routes/userRoutes';
 import { classRouter} from '../infrastructure/http/routes/classRoutes';
+import { resetSenhaRouter} from '../infrastructure/http/routes/resetSenhaRouts';
 import { bootstrapFirstCoordinator } from './bootstrapFirstCoordinator';
 import { reservaRoutes } from '../infrastructure/http/routes/reservaRoutes';
 import { notificacaoRoutes } from '../infrastructure/http/routes/notificacaoRoutes';
@@ -46,6 +47,7 @@ app.use(express.json());
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
 app.use('/api/class', classRouter);
+app.use('/api/resetSenha', resetSenhaRouter);
 
 app.use('/api/reservas', ensureAuthenticated, reservaRoutes);
 app.use('/api/notificacoes', ensureAuthenticated, notificacaoRoutes);

@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { ResetSenhaController } from '../controllers/resetSenhaController';
-import { ensureAuthenticated, ensureRole } from '../middlewares/authMiddleware';
 
 const resetSenhaRouter = Router();
 const resetSenhaController = new ResetSenhaController();

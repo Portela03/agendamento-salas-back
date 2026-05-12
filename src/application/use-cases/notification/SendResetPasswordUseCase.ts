@@ -14,7 +14,16 @@ export class SendResetPasswordUseCase {
 
   async execute(email: string): Promise<void> {
     const user = await this.userRepo.findByEmail(email);
-    if (!user || user.status !== 'APROVADO') return;
+
+    if (!user) {
+      console.log('[ResetSenha] usuário não encontrado:', email);
+      return;
+    }
+
+    if (user.status !== 'APROVADO') {
+      console.log('[ResetSenha] usuário não aprovado:', email, user.status);
+      return;
+    }
     
     const token = crypto.randomBytes(32).toString('hex');
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
@@ -30,5 +39,7 @@ export class SendResetPasswordUseCase {
       user.email,
       'Redefinição de senha',
       emailEsqueceuSenha(user.name, token),
-    );  }
+    );
+    console.log('[ResetSenha] tentativa de envio para:', user.email);
+  }
 }
