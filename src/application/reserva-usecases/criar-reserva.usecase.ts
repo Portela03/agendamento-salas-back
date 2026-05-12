@@ -1,9 +1,11 @@
 import { Reserva } from "../../domain/reserva/reserva.entity";
 import { ReservaRepository } from "../../domain/reserva/reserva-repository.interface";
 import { INotificationService } from "../notification/notification.service.interface";
+import { IPeriodoInativoProfessorRepository } from "../../domain/reserva-periodo-inativo/periodo-inativo-professor.repository.interface";
 
 interface CriarReservaRequest {
   professorId: string
+  professorRole: string
   classId: string
   data: Date
   horarioInicio: string
@@ -48,6 +50,7 @@ function isSameDate(a: Date, b: Date): boolean {
 export class CriarReservaUseCase {
   constructor(
     private reservaRepository: ReservaRepository,
+    private periodoInativoProfessorRepository?: IPeriodoInativoProfessorRepository,
     private notificationService?: INotificationService,
   ) {}
 
@@ -78,6 +81,14 @@ export class CriarReservaUseCase {
 
     if (!data.turma || data.turma.trim().length === 0) {
       throw new Error('Turma é obrigatória.')
+    }
+
+    if (data.professorRole === 'PROFESSOR' && this.periodoInativoProfessorRepository) {
+      const periodoInativo = await this.periodoInativoProfessorRepository.findByDate(dataReserva)
+
+      if (periodoInativo) {
+        throw new Error('Não é permitido realizar reservas no período definido pela administração para o perfil Professor.')
+      }
     }
 
     const conflito = await this.reservaRepository.findConflito(
