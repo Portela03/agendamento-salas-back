@@ -7,6 +7,8 @@ import { ApproveUserUseCase } from '../../../application/use-cases/users/Approve
 import { prismaClient } from '../../database/prisma/prismaClient';
 import { PrismaUserRepository } from '../../database/prisma/PrismaUserRepository';
 import { notificationService } from '../../notification/notification.singleton';
+import bcrypt from 'bcrypt';
+
 
 /**
  * UserController — handles HTTP concerns and delegates to CreateUserUseCase.
@@ -192,6 +194,57 @@ export class UserController {
       }
 
       res.status(500).json({ message: 'Erro ao atualizar usuário.' });
+    }
+  }
+
+  async updateSenha(req: Request, res:Response): Promise<void> {
+    try {
+      const userId = req.user?.id; // usuário autenticado
+      const {newPassword, confirmNewPassword } = req.body;
+
+      if (!userId) {
+        res.status(401).json({ message: 'Não autenticado.' });
+        return;
+      }
+
+      if (
+        typeof newPassword !== 'string' ||
+        typeof confirmNewPassword !== 'string'
+      ) {
+        res.status(400).json({ message: 'Dados inválidos.' });
+        return;
+      }
+
+      if (newPassword.length < 6) {
+        res.status(400).json({ message: 'A nova senha deve ter ao menos 6 caracteres.' });
+        return;
+      }
+
+      if (newPassword !== confirmNewPassword) {
+        res.status(400).json({ message: 'Confirmação de senha não confere.' });
+        return;
+      }
+
+      const user = await prismaClient.user.findUnique({
+        where: { id: userId },
+        select: { id: true, password: true },
+      });
+
+      if (!user) {
+        res.status(404).json({ message: 'Usuário não encontrado.' });
+        return;
+      }
+
+      const passwordHash = await bcrypt.hash(newPassword, 10);
+
+      await prismaClient.user.update({
+        where: { id: userId },
+        data: { password: passwordHash },
+      });
+
+      res.status(200).json({ message: 'Senha atualizada com sucesso.' });
+    } catch {
+      res.status(500).json({ message: 'Erro ao atualizar senha.' });
     }
   }
 

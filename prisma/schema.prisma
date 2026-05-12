@@ -19,19 +19,19 @@ enum UserStatus {
   APROVADO
 }
 
-
 model User {
-  id         String     @id @default(uuid())
-  name       String
-  email      String     @unique
-  password   String
-  role       UserRole
-  status     UserStatus @default(PENDENTE)
-  approvedAt DateTime?  @map("approved_at")
-  createdAt  DateTime   @default(now()) @map("created_at")
-  updatedAt  DateTime   @updatedAt @map("updated_at")
-  reservas      Reserva[]
-  notificacoes  Notificacao[]
+  id               String            @id @default(uuid())
+  name             String
+  email            String            @unique
+  password         String
+  role             UserRole
+  status           UserStatus        @default(PENDENTE)
+  approvedAt       DateTime?         @map("approved_at")
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+  reservas         Reserva[]
+  notificacoes     Notificacao[]
+  resetSenhaTokens ResetSenha[]
 
   @@map("users")
 }
@@ -48,34 +48,34 @@ enum ClassStatus {
 }
 
 model Class {
-  id          String       @id @default(uuid())
-  name        String       @unique
+  id          String      @id @default(uuid())
+  name        String      @unique
   description String?
   capacity    Int
   type        ClassType
-  status      ClassStatus  @default(DISPONIVEL)
-  createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
+  status      ClassStatus @default(DISPONIVEL)
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
 
-  reservas    Reserva[]
+  reservas Reserva[]
 
   @@map("classes")
 }
 
 model Reserva {
-  id            String    @id @default(uuid())
+  id            String   @id @default(uuid())
   professorId   String
   classId       String
   data          DateTime
   horario       String
-  horarioInicio String    @default("") @map("horario_inicio")
-  horarioFim    String    @default("") @map("horario_fim")
-  turma         String    @default("")
+  horarioInicio String   @default("") @map("horario_inicio")
+  horarioFim    String   @default("") @map("horario_fim")
+  turma         String   @default("")
   periodo       String
   semestre      String
   status        String
   justificativa String?
-  createdAt     DateTime  @default(now())
+  createdAt     DateTime @default(now())
 
   professor User  @relation(fields: [professorId], references: [id])
   class     Class @relation(fields: [classId], references: [id], onDelete: Cascade)
@@ -100,4 +100,17 @@ model Notificacao {
   user User @relation(fields: [userId], references: [id])
 
   @@map("notificacoes")
+}
+
+model ResetSenha {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String
+  expireAt  DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("reset_senha")
 }

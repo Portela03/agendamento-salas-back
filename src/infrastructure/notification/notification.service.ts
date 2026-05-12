@@ -10,6 +10,7 @@ import {
   emailNovaReserva,
   emailReservaAprovada,
   emailReservaRejeitada,
+  emailEsqueceuSenha,
 } from "../email/email.templates";
 
 export class NotificationService implements INotificationService {
@@ -166,6 +167,7 @@ export class NotificationService implements INotificationService {
       console.error(`[NotificationService] notifyReservaAprovada: falha ao enviar email para ${professor.email}:`, err);
     }
   }
+
   async notifyReservaRejeitada(reserva: Reserva): Promise<void> {
     const professor = await this.userRepository.findById(reserva.professorId);
     if (!professor) return;
@@ -202,4 +204,35 @@ export class NotificationService implements INotificationService {
       console.error(`[NotificationService] notifyReservaRejeitada: falha ao enviar email para ${professor.email}:`, err);
     }
   }
+
+  async enviarResetSenha (email: string, token: string): Promise<void> {
+    let user: User | null = null;
+
+    try {
+      user = await this.userRepository.findByEmail(email);
+    } catch (err) {
+      console.error("[NotificationService] notifyResetSenha: falha ao buscar usuário por email:", err);
+      return;
+    }
+
+    if (!user) {
+      console.warn(`[NotificationService] notifyResetSenha: usuário não encontrado (${email}).`);
+      return;
+    }
+
+    if (user.status !== "APROVADO") {
+      console.warn(`[NotificationService] notifyResetSenha: usuário não aprovado (${email}).`);
+      return;
+    }
+
+    try {
+      await this.emailService.sendMail(
+        user.email,
+        "Redefinição de senha",
+        emailEsqueceuSenha(user.name, token),
+      );
+    } catch (err) {
+      console.error(`[NotificationService] notifyResetSenha: falha ao enviar email para ${user.email}:`, err);
+    }
+  };  
 }
