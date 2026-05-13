@@ -16,6 +16,7 @@ import {
 import { notificationService } from "../../notification/notification.singleton";
 import { prismaClient } from "../../database/prisma/prismaClient";
 import { PrismaPeriodoInativoProfessorRepository } from "../../database/prisma/PrismaPeriodoInativoProfessorRepository";
+import ApiError from "../../../shared/errors/ApiError";
 
 const reservaRepository = new PrismaReservaRepository();
 const periodoInativoProfessorRepository = new PrismaPeriodoInativoProfessorRepository(prismaClient);
@@ -50,6 +51,9 @@ export class ReservaController {
 
       return response.status(201).json(reserva);
     } catch (error) {
+      if (error instanceof ApiError) {
+        return response.status(error.status).json({ code: error.code, message: error.message });
+      }
       if (error instanceof Error) {
         return response.status(400).json({ message: error.message });
       }
@@ -63,6 +67,9 @@ export class ReservaController {
       const reservas = await useCase.execute();
       return response.json(reservas);
     } catch (error) {
+      if (error instanceof ApiError) {
+        return response.status(error.status).json({ code: error.code, message: error.message });
+      }
       if (error instanceof Error) {
         return response.status(400).json({ message: error.message });
       }
@@ -77,6 +84,9 @@ export class ReservaController {
       const reservas = await useCase.execute(professorId);
       return response.json(reservas);
     } catch (error) {
+      if (error instanceof ApiError) {
+        return response.status(error.status).json({ code: error.code, message: error.message });
+      }
       if (error instanceof Error) {
         return response.status(400).json({ message: error.message });
       }
@@ -93,6 +103,9 @@ export class ReservaController {
 
       return response.json(reserva);
     } catch (error) {
+      if (error instanceof ApiError) {
+        return response.status(error.status).json({ code: error.code, message: error.message });
+      }
       if (error instanceof Error) {
         return response.status(400).json({ message: error.message });
       }
@@ -114,6 +127,9 @@ export class ReservaController {
 
       return response.json(reserva);
     } catch (error) {
+      if (error instanceof ApiError) {
+        return response.status(error.status).json({ code: error.code, message: error.message });
+      }
       if (error instanceof Error) {
         return response.status(400).json({ message: error.message });
       }
@@ -144,6 +160,9 @@ export class ReservaController {
 
       return response.json(reservas);
     } catch (error) {
+      if (error instanceof ApiError) {
+        return response.status(error.status).json({ code: error.code, message: error.message });
+      }
       if (error instanceof Error) {
         return response.status(400).json({ message: error.message });
       }
@@ -158,6 +177,9 @@ export class ReservaController {
 
       return response.json(periodo);
     } catch (error) {
+      if (error instanceof ApiError) {
+        return response.status(error.status).json({ code: error.code, message: error.message });
+      }
       if (error instanceof Error) {
         return response.status(400).json({ message: error.message });
       }
@@ -177,6 +199,9 @@ export class ReservaController {
 
       return response.status(200).json(periodo);
     } catch (error) {
+      if (error instanceof ApiError) {
+        return response.status(error.status).json({ code: error.code, message: error.message });
+      }
       if (error instanceof Error) {
         return response.status(400).json({ message: error.message });
       }
@@ -191,6 +216,9 @@ export class ReservaController {
 
       return response.status(204).send();
     } catch (error) {
+      if (error instanceof ApiError) {
+        return response.status(error.status).json({ code: error.code, message: error.message });
+      }
       if (error instanceof Error) {
         return response.status(400).json({ message: error.message });
       }
