@@ -17,12 +17,16 @@ export class SendResetPasswordUseCase {
 
     if (!user) {
       console.log('[ResetSenha] usuário não encontrado:', email);
-      return;
+      const err = new Error('Email não encontrado.');
+      (err as any).code = 'USER_NOT_FOUND';
+      throw err;
     }
 
     if (user.status !== 'APROVADO') {
       console.log('[ResetSenha] usuário não aprovado:', email, user.status);
-      return;
+      const err = new Error('Conta ainda não aprovada.');
+      (err as any).code = 'USER_NOT_APPROVED';
+      throw err;
     }
     
     const token = crypto.randomBytes(32).toString('hex');

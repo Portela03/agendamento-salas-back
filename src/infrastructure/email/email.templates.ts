@@ -255,7 +255,7 @@ export function emailReservaRejeitada(
 }
 
 export function emailEsqueceuSenha(name: string, token: string): string {
-  const url = `${APP_URL}/auth/reset-password?token=${token}`;
+  const url = `${APP_URL}/resetar-senha?token=${token}`;
 
   return base({
     title: 'Redefinição de senha',

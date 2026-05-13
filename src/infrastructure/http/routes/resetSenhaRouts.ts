@@ -15,8 +15,5 @@ resetSenhaRouter.post(
 );
 
 
-//notificacaoRoutes.post('/esqueceu-senha', (req, res) => notificacaoController.sendResetPassword(req, res));
-//notificacaoRoutes.post('/reset-senha', (req, res) => notificacaoController.resetPassword(req, res));
-
 
 export { resetSenhaRouter }

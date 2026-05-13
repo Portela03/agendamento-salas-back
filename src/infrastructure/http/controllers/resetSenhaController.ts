@@ -35,12 +35,29 @@ export class ResetSenhaController{
             userRepository,
             emailService,
           );
+
           await useCase.execute(email);
     
-          res.json({ message: 'Se o email estiver cadastrado e aprovado, um link de redefinição será enviado.'});
-        } catch (error) {
+          res.status(200).json({ message: 'Email enviado! Verifique a caixa de entrada, spam ou lixo eletrônico'});
+        } catch (error: any) {
           console.error('[ResetSenhaController] sendResetPassword:', error);
-          res.status(500).json({ message: 'Erro ao enviar email.' });
+
+          if (error?.code === 'USER_NOT_FOUND') {
+            res.status(404).json({ message: 'Email não encontrado.' });
+            return;
+          }
+
+          if (error?.code === 'USER_NOT_APPROVED') {
+            res.status(403).json({ message: 'Conta ainda não aprovada.' });
+            return;
+          }
+
+          if (error?.code === 'EMAIL_SEND_FAILED' || error?.code === 'EAUTH' || error?.code === 'ESOCKET') {
+            res.status(502).json({ message: 'Falha ao enviar email.' });
+            return;
+          }
+
+          res.status(500).json({ message: 'Erro interno ao solicitar redefinição de senha.' });
         }
       }
     

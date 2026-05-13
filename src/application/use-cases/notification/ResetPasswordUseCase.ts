@@ -1,4 +1,4 @@
-import { IResetPasswordRepository } from '../../../domain/repositories/IResetPasswordRepository'
+import { IResetPasswordRepository } from '../../../domain/repositories/IResetPasswordRepository';
 import { IUserRepository } from '../../../domain/repositories/IUserRepository';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
@@ -31,14 +31,7 @@ export class ResetPasswordUseCase {
     }
 
     const passwordHash = await bcrypt.hash(newPassword, 10);
-    
-
-    const user = await this.resetPasswordRepo.findByTokenHash(token);
-    if (!user || !user.expireAt || user.expireAt < new Date()) {
-      throw new Error('Token inválido ou expirado');
-    }
-    const hash = await bcrypt.hash(newPassword, 10);
-    await this.userRepo.updateSenha(user.id, hash);
-    await this.resetPasswordRepo.markUsed(user.id);
+    await this.userRepo.updateSenha(realUser.id, passwordHash);
+    await this.resetPasswordRepo.markUsed(resetToken.id);
   }
 }
