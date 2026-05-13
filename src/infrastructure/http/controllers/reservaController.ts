@@ -8,9 +8,17 @@ import { ListarReservasProfessorUseCase } from "../../../application/reserva-use
 import { AprovarReservaUseCase } from "../../../application/reserva-usecases/aprovar-reserva.usecase";
 import { RejeitarReservaUseCase } from "../../../application/reserva-usecases/rejeitar-reserva.usecase";
 import { ListarReservasCalendarioUseCase } from "../../../application/reserva-usecases/listar-reservas-calendario.usecase";
+import {
+  DefinirPeriodoInativoProfessorUseCase,
+  ObterPeriodoInativoProfessorUseCase,
+  RemoverPeriodoInativoProfessorUseCase,
+} from "../../../application/reserva-usecases/gerenciar-periodo-inativo-professor.usecase";
 import { notificationService } from "../../notification/notification.singleton";
+import { prismaClient } from "../../database/prisma/prismaClient";
+import { PrismaPeriodoInativoProfessorRepository } from "../../database/prisma/PrismaPeriodoInativoProfessorRepository";
 
 const reservaRepository = new PrismaReservaRepository();
+const periodoInativoProfessorRepository = new PrismaPeriodoInativoProfessorRepository(prismaClient);
 
 export class ReservaController {
 
@@ -24,10 +32,15 @@ export class ReservaController {
       }
 
       const professorId = request.user!.id;
-      const useCase = new CriarReservaUseCase(reservaRepository, notificationService);
+      const useCase = new CriarReservaUseCase(
+        reservaRepository,
+        periodoInativoProfessorRepository,
+        notificationService,
+      );
 
       const reserva = await useCase.execute({
         professorId,
+        professorRole: request.user!.role,
         classId: resolvedClassId,
         data: new Date(data),
         horarioInicio,
@@ -130,6 +143,53 @@ export class ReservaController {
       });
 
       return response.json(reservas);
+    } catch (error) {
+      if (error instanceof Error) {
+        return response.status(400).json({ message: error.message });
+      }
+      return response.status(500).json({ message: 'Erro interno do servidor.' });
+    }
+  }
+
+  async obterPeriodoInativoProfessor(_request: Request, response: Response) {
+    try {
+      const useCase = new ObterPeriodoInativoProfessorUseCase(periodoInativoProfessorRepository);
+      const periodo = await useCase.execute();
+
+      return response.json(periodo);
+    } catch (error) {
+      if (error instanceof Error) {
+        return response.status(400).json({ message: error.message });
+      }
+      return response.status(500).json({ message: 'Erro interno do servidor.' });
+    }
+  }
+
+  async definirPeriodoInativoProfessor(request: Request, response: Response) {
+    try {
+      const { dataInicio, dataFim } = request.body;
+      const useCase = new DefinirPeriodoInativoProfessorUseCase(periodoInativoProfessorRepository);
+
+      const periodo = await useCase.execute({
+        dataInicio,
+        dataFim,
+      });
+
+      return response.status(200).json(periodo);
+    } catch (error) {
+      if (error instanceof Error) {
+        return response.status(400).json({ message: error.message });
+      }
+      return response.status(500).json({ message: 'Erro interno do servidor.' });
+    }
+  }
+
+  async removerPeriodoInativoProfessor(_request: Request, response: Response) {
+    try {
+      const useCase = new RemoverPeriodoInativoProfessorUseCase(periodoInativoProfessorRepository);
+      await useCase.execute();
+
+      return response.status(204).send();
     } catch (error) {
       if (error instanceof Error) {
         return response.status(400).json({ message: error.message });

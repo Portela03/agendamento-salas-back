@@ -5,11 +5,30 @@ import { ensureAuthenticated, ensureRole } from "../middlewares/authMiddleware";
 const reservaRoutes = Router();
 const reservaController = new ReservaController();
 
-// Professor: criar reserva (autenticado)
-reservaRoutes.post(
-  "/",
+// ── ROTAS ESPECÍFICAS (devem vir ANTES das rotas com :id) ──
+
+// Coordenador: consultar intervalo em que professor não pode reservar
+reservaRoutes.get(
+  "/periodo-inativo-professor",
   ensureAuthenticated,
-  (req, res) => reservaController.criar(req, res)
+  ensureRole('COORDENADOR'),
+  (req, res) => reservaController.obterPeriodoInativoProfessor(req, res)
+);
+
+// Coordenador: definir ou atualizar intervalo em que professor não pode reservar
+reservaRoutes.put(
+  "/periodo-inativo-professor",
+  ensureAuthenticated,
+  ensureRole('COORDENADOR'),
+  (req, res) => reservaController.definirPeriodoInativoProfessor(req, res)
+);
+
+// Coordenador: remover bloqueio ativo
+reservaRoutes.delete(
+  "/periodo-inativo-professor",
+  ensureAuthenticated,
+  ensureRole('COORDENADOR'),
+  (req, res) => reservaController.removerPeriodoInativoProfessor(req, res)
 );
 
 // Professor: listar suas próprias reservas
@@ -17,6 +36,22 @@ reservaRoutes.get(
   "/minhas",
   ensureAuthenticated,
   (req, res) => reservaController.listarPorProfessor(req, res)
+);
+
+// Todos autenticados: visualizar calendário de disponibilidade
+reservaRoutes.get(
+  "/calendario",
+  ensureAuthenticated,
+  (req, res) => reservaController.calendario(req, res)
+);
+
+// ── ROTAS GENÉRICAS E COM PARÂMETROS ──
+
+// Professor: criar reserva (autenticado)
+reservaRoutes.post(
+  "/",
+  ensureAuthenticated,
+  (req, res) => reservaController.criar(req, res)
 );
 
 // Coordenador: listar todas as reservas
@@ -41,13 +76,6 @@ reservaRoutes.patch(
   ensureAuthenticated,
   ensureRole('COORDENADOR'),
   (req, res) => reservaController.rejeitar(req, res)
-);
-
-// Todos autenticados: visualizar calendário de disponibilidade
-reservaRoutes.get(
-  "/calendario",
-  ensureAuthenticated,
-  (req, res) => reservaController.calendario(req, res)
 );
 
 export { reservaRoutes };
