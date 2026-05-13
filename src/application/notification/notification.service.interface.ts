@@ -7,4 +7,5 @@ export interface INotificationService {
   notifyNewReservation(reserva: Reserva): Promise<void>;
   notifyReservaAprovada(reserva: Reserva): Promise<void>;
   notifyReservaRejeitada(reserva: Reserva): Promise<void>;
+  enviarResetSenha(email: String, token:String): Promise<void>;
 }

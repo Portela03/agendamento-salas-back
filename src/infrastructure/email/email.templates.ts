@@ -253,3 +253,31 @@ export function emailReservaRejeitada(
     `,
   });
 }
+
+export function emailEsqueceuSenha(name: string, token: string): string {
+  const url = `${APP_URL}/resetar-senha?token=${token}`;
+
+  return base({
+    title: 'Redefinição de senha',
+    preheader: 'Foi solicitada a redefinição da sua senha.',
+    accentColor: '#dc2626',
+    accentLabel: 'Redefinir senha',
+    accentIcon: '🔒',
+    ctaLabel: 'Redefinir minha senha',
+    ctaUrl: url,
+    body: `
+      <p style="margin:0 0 20px;font-size:16px;color:#334155;">Olá, <strong>${name}</strong>!</p>
+      <p style="margin:0 0 20px;font-size:15px;color:#475569;line-height:1.6;">
+        Recebemos uma solicitação para redefinir sua senha. Se foi você, clique no botão abaixo.
+      </p>
+      <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:16px 20px;margin:20px 0;">
+        <p style="margin:0;font-size:14px;color:#7f1d1d;">
+          Este link é válido por 1 hora.
+        </p>
+      </div>
+      <p style="margin:20px 0 0;font-size:14px;color:#64748b;line-height:1.6;">
+        Se você não solicitou essa alteração, ignore este email.
+      </p>
+    `,
+  });
+}

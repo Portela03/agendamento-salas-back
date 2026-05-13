@@ -67,6 +67,15 @@ export class PrismaUserRepository implements IUserRepository {
     return this.toDomain(raw);
   }
 
+  async updateSenha(id: string, passwordHash: string): Promise<User> {
+    const raw = await this.prisma.user.update({
+      where: { id },
+      data: { password: passwordHash, updatedAt: new Date() },
+    });
+
+    return this.toDomain(raw);
+  }
+  
   private toDomain(raw: {
     id: string;
     name: string;

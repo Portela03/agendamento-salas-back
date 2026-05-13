@@ -21,4 +21,6 @@ export interface IUserRepository {
   approveUser(id: string): Promise<User | null>;
   countUsers(): Promise<number>;
   create(data: CreateUserData): Promise<User>;
+  updateSenha(id: string, passwordHash: string): Promise<User>;
+  
 }
