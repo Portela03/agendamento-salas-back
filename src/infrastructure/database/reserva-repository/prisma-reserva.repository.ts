@@ -149,6 +149,8 @@ export class PrismaReservaRepository implements ReservaRepository {
 
     if (!reserva) return null;
     return this.toDomain(reserva);
+  }
+  
   async createMany(reservas: Reserva[]): Promise<Reserva[]> {
     if (reservas.length === 0) return [];
 
