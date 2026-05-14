@@ -49,6 +49,13 @@ reservaRoutes.get(
 
 // Professor: criar reserva (autenticado)
 reservaRoutes.post(
+  "/semestre",
+  ensureAuthenticated,
+  (req, res) => reservaController.criarSemestre(req, res)
+);
+
+// Professor: criar reserva (autenticado)
+reservaRoutes.post(
   "/",
   ensureAuthenticated,
   (req, res) => reservaController.criar(req, res)
@@ -60,6 +67,14 @@ reservaRoutes.get(
   ensureAuthenticated,
   ensureRole('COORDENADOR'),
   (req, res) => reservaController.listar(req, res)
+);
+
+// Coordenador: aprovar reserva
+reservaRoutes.patch(
+  "/serie/:serieId/aprovar",
+  ensureAuthenticated,
+  ensureRole('COORDENADOR'),
+  (req, res) => reservaController.aprovarSerie(req, res)
 );
 
 // Coordenador: aprovar reserva

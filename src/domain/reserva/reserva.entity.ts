@@ -11,6 +11,9 @@ export class Reserva {
   turma: string
   periodo: string
   semestre: string
+  serieId?: string
+  serieTotal?: number
+  serieOrdem?: number
   status: ReservaStatus
   justificativa?: string
   createdAt: Date
@@ -30,6 +33,9 @@ export class Reserva {
     turma: string
     periodo: string
     semestre: string
+    serieId?: string
+    serieTotal?: number
+    serieOrdem?: number
     status?: ReservaStatus
     justificativa?: string
     createdAt?: Date
@@ -46,6 +52,9 @@ export class Reserva {
     this.turma = props.turma
     this.periodo = props.periodo
     this.semestre = props.semestre
+    this.serieId = props.serieId
+    this.serieTotal = props.serieTotal
+    this.serieOrdem = props.serieOrdem
     this.status = props.status ?? ReservaStatus.AGUARDANDO
     this.justificativa = props.justificativa
     this.createdAt = props.createdAt ?? new Date()
