@@ -217,9 +217,6 @@ export class ReservaController {
 
       return response.json(reserva);
     } catch (error) {
-      if (error instanceof ApiError) {
-        return response.status(error.status).json({ code: error.code, message: error.message });
-      }
       if (error instanceof Error) {
         return response.status(400).json({ message: error.message });
       }
