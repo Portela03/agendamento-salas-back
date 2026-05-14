@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { PrismaReservaRepository } from "../../database/reserva-repository/prisma-reserva.repository";
 
 import { CriarReservaUseCase } from "../../../application/reserva-usecases/criar-reserva.usecase";
+import { CriarReservasSemestreUseCase } from "../../../application/reserva-usecases/criar-reservas-semestre.usecase";
 import { ListarReservasUseCase } from "../../../application/reserva-usecases/listar-reservas.usecase";
 import { ListarReservasProfessorUseCase } from "../../../application/reserva-usecases/listar-reservas-professor.usecase";
 import { AprovarReservaUseCase } from "../../../application/reserva-usecases/aprovar-reserva.usecase";
@@ -17,6 +18,8 @@ import {
 import { notificationService } from "../../notification/notification.singleton";
 import { prismaClient } from "../../database/prisma/prismaClient";
 import { PrismaPeriodoInativoProfessorRepository } from "../../database/prisma/PrismaPeriodoInativoProfessorRepository";
+import ApiError from "../../../shared/errors/ApiError";
+import { ReservaStatus } from "../../../domain/reserva/reserva-status.enum";
 
 const reservaRepository = new PrismaReservaRepository();
 const periodoInativoProfessorRepository = new PrismaPeriodoInativoProfessorRepository(prismaClient);
@@ -51,7 +54,62 @@ export class ReservaController {
 
       return response.status(201).json(reserva);
     } catch (error) {
+      if (error instanceof ApiError) {
+        return response.status(error.status).json({ code: error.code, message: error.message });
+      }
       if (error instanceof Error) {
+        return response.status(400).json({ message: error.message });
+      }
+      return response.status(500).json({ message: "Erro interno do servidor." });
+    }
+  }
+
+  async criarSemestre(request: Request, response: Response) {
+    try {
+      const { classId, salaId, data, dataInicial, horarioInicio, horarioFim, turma, ignorarConflitos } = request.body;
+
+      const resolvedClassId = classId ?? salaId;
+      if (!resolvedClassId) {
+        return response.status(400).json({ message: "classId e obrigatorio." });
+      }
+
+      const resolvedDate = dataInicial ?? data;
+      if (!resolvedDate) {
+        return response.status(400).json({ message: "dataInicial e obrigatoria." });
+      }
+
+      const professorId = request.user!.id;
+      const useCase = new CriarReservasSemestreUseCase(
+        reservaRepository,
+        periodoInativoProfessorRepository,
+        notificationService,
+      );
+
+      const resultado = await useCase.execute({
+        professorId,
+        professorRole: request.user!.role,
+        classId: resolvedClassId,
+        dataInicial: new Date(resolvedDate),
+        horarioInicio,
+        horarioFim,
+        turma,
+        ignorarConflitos: Boolean(ignorarConflitos),
+      });
+
+      return response.status(201).json(resultado);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        return response.status(error.status).json({ code: error.code, message: error.message });
+      }
+      if (error instanceof Error) {
+        const detailedError = error as Error & { code?: string; conflitos?: string[] };
+        if (detailedError.code === 'SEMESTER_CONFLICTS') {
+          return response.status(409).json({
+            code: detailedError.code,
+            message: detailedError.message,
+            conflitos: detailedError.conflitos ?? [],
+          });
+        }
         return response.status(400).json({ message: error.message });
       }
       return response.status(500).json({ message: "Erro interno do servidor." });
@@ -64,6 +122,9 @@ export class ReservaController {
       const reservas = await useCase.execute();
       return response.json(reservas);
     } catch (error) {
+      if (error instanceof ApiError) {
+        return response.status(error.status).json({ code: error.code, message: error.message });
+      }
       if (error instanceof Error) {
         return response.status(400).json({ message: error.message });
       }
@@ -78,6 +139,9 @@ export class ReservaController {
       const reservas = await useCase.execute(professorId);
       return response.json(reservas);
     } catch (error) {
+      if (error instanceof ApiError) {
+        return response.status(error.status).json({ code: error.code, message: error.message });
+      }
       if (error instanceof Error) {
         return response.status(400).json({ message: error.message });
       }
@@ -94,6 +158,30 @@ export class ReservaController {
 
       return response.json(reserva);
     } catch (error) {
+      if (error instanceof ApiError) {
+        return response.status(error.status).json({ code: error.code, message: error.message });
+      }
+      if (error instanceof Error) {
+        return response.status(400).json({ message: error.message });
+      }
+      return response.status(500).json({ message: 'Erro interno do servidor.' });
+    }
+  }
+
+  async aprovarSerie(request: Request, response: Response) {
+    try {
+      const { serieId } = request.params;
+
+      const reservas = await reservaRepository.updateSeriesStatus(serieId, ReservaStatus.APROVADA);
+      if (reservas.length > 0 && notificationService.notifyReservaSerieAprovada) {
+        void notificationService.notifyReservaSerieAprovada(reservas);
+      }
+
+      return response.json(reservas);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        return response.status(error.status).json({ code: error.code, message: error.message });
+      }
       if (error instanceof Error) {
         return response.status(400).json({ message: error.message });
       }
@@ -115,6 +203,9 @@ export class ReservaController {
 
       return response.json(reserva);
     } catch (error) {
+      if (error instanceof ApiError) {
+        return response.status(error.status).json({ code: error.code, message: error.message });
+      }
       if (error instanceof Error) {
         return response.status(400).json({ message: error.message });
       }
@@ -145,6 +236,9 @@ export class ReservaController {
 
       return response.json(reservas);
     } catch (error) {
+      if (error instanceof ApiError) {
+        return response.status(error.status).json({ code: error.code, message: error.message });
+      }
       if (error instanceof Error) {
         return response.status(400).json({ message: error.message });
       }
@@ -159,6 +253,9 @@ export class ReservaController {
 
       return response.json(periodo);
     } catch (error) {
+      if (error instanceof ApiError) {
+        return response.status(error.status).json({ code: error.code, message: error.message });
+      }
       if (error instanceof Error) {
         return response.status(400).json({ message: error.message });
       }
@@ -178,6 +275,9 @@ export class ReservaController {
 
       return response.status(200).json(periodo);
     } catch (error) {
+      if (error instanceof ApiError) {
+        return response.status(error.status).json({ code: error.code, message: error.message });
+      }
       if (error instanceof Error) {
         return response.status(400).json({ message: error.message });
       }
@@ -192,6 +292,9 @@ export class ReservaController {
 
       return response.status(204).send();
     } catch (error) {
+      if (error instanceof ApiError) {
+        return response.status(error.status).json({ code: error.code, message: error.message });
+      }
       if (error instanceof Error) {
         return response.status(400).json({ message: error.message });
       }
@@ -224,3 +327,4 @@ export class ReservaController {
     }
   }
 }
+

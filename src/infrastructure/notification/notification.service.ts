@@ -134,6 +134,46 @@ export class NotificationService implements INotificationService {
     );
   }
 
+  async notifyNewReservationSeries(reservas: Reserva[]): Promise<void> {
+    if (reservas.length === 0) return;
+
+    const primeiraReserva = reservas[0];
+    let professor: User | null = null;
+    try {
+      professor = await this.userRepository.findById(primeiraReserva.professorId);
+    } catch (err) {
+      console.error('[NotificationService] notifyNewReservationSeries: falha ao buscar professor:', err);
+    }
+
+    const professorNome = professor?.name ?? primeiraReserva.professorNome ?? "Professor";
+    const salaNome = primeiraReserva.salaNome ?? primeiraReserva.salaId;
+    const primeiraData = new Date(primeiraReserva.data).toLocaleDateString("pt-BR");
+    const ultimaData = new Date(reservas[reservas.length - 1].data).toLocaleDateString("pt-BR");
+    const message = `Nova solicitação semestral de ${reservas.length} reservas da sala "${salaNome}" por ${professorNome}, de ${primeiraData} a ${ultimaData} (${primeiraReserva.horario}).`;
+
+    let coordinators: User[] = [];
+    try {
+      coordinators = await this.userRepository.findAllByRole("COORDENADOR");
+    } catch (err) {
+      console.error('[NotificationService] notifyNewReservationSeries: falha ao buscar coordenadores:', err);
+      return;
+    }
+
+    await Promise.all(
+      coordinators.map(async (coord) => {
+        try {
+          await this.notificacaoRepository.create({
+            userId: coord.id,
+            message,
+            type: "NOVA_RESERVA",
+          });
+        } catch (err) {
+          console.error(`[NotificationService] notifyNewReservationSeries: falha ao criar notificação para coordenador ${coord.email}:`, err);
+        }
+      }),
+    );
+  }
+
   async notifyReservaAprovada(reserva: Reserva): Promise<void> {
     const professor = await this.userRepository.findById(reserva.professorId);
     if (!professor) return;
@@ -166,6 +206,36 @@ export class NotificationService implements INotificationService {
     } catch (err) {
       console.error(`[NotificationService] notifyReservaAprovada: falha ao enviar email para ${professor.email}:`, err);
     }
+  }
+
+  async notifyReservaSerieAprovada(reservas: Reserva[]): Promise<void> {
+    if (reservas.length === 0) return;
+    const primeiraReserva = reservas[0];
+    const professor = await this.userRepository.findById(primeiraReserva.professorId);
+    if (!professor) return;
+    const salaNome = primeiraReserva.salaNome ?? primeiraReserva.salaId;
+    const primeiraData = new Date(primeiraReserva.data).toLocaleDateString("pt-BR");
+    const ultimaData = new Date(reservas[reservas.length - 1].data).toLocaleDateString("pt-BR");
+    const message = `Sua reserva semestral da sala "${salaNome}" de ${primeiraData} a ${ultimaData} (${primeiraReserva.horario}) foi APROVADA.`;
+    try {
+      await this.notificacaoRepository.create({
+        userId: professor.id,
+        message,
+        type: "RESERVA_APROVADA",
+      });
+    } catch (err) {}
+    try {
+      await this.emailService.sendMail(
+        professor.email,
+        "Sua reserva semestral foi aprovada!",
+        emailReservaAprovada(professor, {
+          salaNome,
+          data: `${primeiraData} a ${ultimaData} (${reservas.length} datas)`,
+          horario: primeiraReserva.horario,
+          turma: primeiraReserva.turma,
+        }),
+      );
+    } catch (err) {}
   }
 
   async notifyReservaRejeitada(reserva: Reserva): Promise<void> {

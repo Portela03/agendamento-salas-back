@@ -73,6 +73,9 @@ model Reserva {
   turma         String   @default("")
   periodo       String
   semestre      String
+  serieId       String?  @map("serie_id")
+  serieTotal    Int?     @map("serie_total")
+  serieOrdem    Int?     @map("serie_ordem")
   status        String
   justificativa String?
   createdAt     DateTime @default(now())

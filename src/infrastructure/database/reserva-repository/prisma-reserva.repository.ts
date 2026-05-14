@@ -83,6 +83,9 @@ export class PrismaReservaRepository implements ReservaRepository {
       turma: reserva.turma,
       periodo: reserva.periodo,
       semestre: reserva.semestre,
+      serieId: reserva.serieId ?? undefined,
+      serieTotal: reserva.serieTotal ?? undefined,
+      serieOrdem: reserva.serieOrdem ?? undefined,
       status: this.parseStatus(reserva.status),
       justificativa: reserva.justificativa ?? undefined,
       createdAt: reserva.createdAt,
@@ -120,6 +123,9 @@ export class PrismaReservaRepository implements ReservaRepository {
         turma: reserva.turma,
         periodo: reserva.periodo,
         semestre: reserva.semestre,
+        serieId: reserva.serieId ?? null,
+        serieTotal: reserva.serieTotal ?? null,
+        serieOrdem: reserva.serieOrdem ?? null,
         status: reserva.status,
         justificativa: reserva.justificativa ?? null,
       },
@@ -143,6 +149,40 @@ export class PrismaReservaRepository implements ReservaRepository {
 
     if (!reserva) return null;
     return this.toDomain(reserva);
+  async createMany(reservas: Reserva[]): Promise<Reserva[]> {
+    if (reservas.length === 0) return [];
+
+    const first = reservas[0];
+    await this.validateRelations(first.professorId, first.salaId);
+
+    const reservasCriadas = await prisma.$transaction(
+      reservas.map((reserva) =>
+        prisma.reserva.create({
+          data: {
+            professorId: reserva.professorId,
+            classId: reserva.salaId,
+            data: reserva.data,
+            horario: reserva.horario,
+            horarioInicio: reserva.horarioInicio,
+            horarioFim: reserva.horarioFim,
+            turma: reserva.turma,
+            periodo: reserva.periodo,
+            semestre: reserva.semestre,
+            serieId: reserva.serieId ?? null,
+            serieTotal: reserva.serieTotal ?? null,
+            serieOrdem: reserva.serieOrdem ?? null,
+            status: reserva.status,
+            justificativa: reserva.justificativa ?? null,
+          },
+          include: {
+            professor: { select: { name: true } },
+            class: { select: { name: true } },
+          },
+        })
+      )
+    );
+
+    return reservasCriadas.map((reserva) => this.toDomain(reserva));
   }
 
   async findAll(): Promise<Reserva[]> {
@@ -185,10 +225,18 @@ export class PrismaReservaRepository implements ReservaRepository {
       throw new Error('Horário inválido para verificação de conflito.');
     }
 
+    const inicioDia = new Date(data);
+    inicioDia.setHours(0, 0, 0, 0);
+    const fimDia = new Date(inicioDia);
+    fimDia.setDate(fimDia.getDate() + 1);
+
     const reservas = await prisma.reserva.findMany({
       where: {
         classId: salaId,
-        data,
+        data: {
+          gte: inicioDia,
+          lt: fimDia,
+        },
         status: { in: [ReservaStatus.APROVADA, ReservaStatus.AGUARDANDO] },
       },
       include: {
@@ -225,6 +273,30 @@ export class PrismaReservaRepository implements ReservaRepository {
     });
 
     return this.toDomain(reservaAtualizada);
+  }
+
+  async updateSeriesStatus(serieId: string, status: ReservaStatus, justificativa?: string): Promise<Reserva[]> {
+    await prisma.reserva.updateMany({
+      where: {
+        serieId,
+        status: ReservaStatus.AGUARDANDO,
+      },
+      data: {
+        status,
+        ...(justificativa !== undefined ? { justificativa } : {}),
+      },
+    });
+
+    const reservas = await prisma.reserva.findMany({
+      where: { serieId },
+      include: {
+        professor: { select: { name: true } },
+        class: { select: { name: true } },
+      },
+      orderBy: { data: "asc" },
+    });
+
+    return reservas.map((reserva) => this.toDomain(reserva));
   }
 
   async findByCalendario(filtros: CalendarioFiltros): Promise<Reserva[]> {

@@ -13,6 +13,7 @@ export interface ReservaRepository {
   create(reserva: Reserva): Promise<Reserva>
 
   findById(id: string): Promise<Reserva | null>
+  createMany(reservas: Reserva[]): Promise<Reserva[]>
 
   findAll(): Promise<Reserva[]>
 
@@ -30,6 +31,12 @@ export interface ReservaRepository {
     status: string,
     justificativa?: string
   ): Promise<Reserva>
+
+  updateSeriesStatus(
+    serieId: string,
+    status: string,
+    justificativa?: string
+  ): Promise<Reserva[]>
 
   findByCalendario(filtros: CalendarioFiltros): Promise<Reserva[]>
 }
