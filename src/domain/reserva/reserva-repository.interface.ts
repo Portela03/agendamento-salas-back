@@ -12,6 +12,8 @@ export interface CalendarioFiltros {
 export interface ReservaRepository {
   create(reserva: Reserva): Promise<Reserva>
 
+  findById(id: string): Promise<Reserva | null>
+
   findAll(): Promise<Reserva[]>
 
   findByProfessor(professorId: string): Promise<Reserva[]>

@@ -78,4 +78,11 @@ reservaRoutes.patch(
   (req, res) => reservaController.rejeitar(req, res)
 );
 
+// Professor ou Coordenador: cancelar reserva
+reservaRoutes.patch(
+  "/:id/cancelar",
+  ensureAuthenticated,
+  (req, res) => reservaController.cancelar(req, res)
+);
+
 export { reservaRoutes };
