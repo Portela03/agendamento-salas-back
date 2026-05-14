@@ -9,6 +9,7 @@ import { ListarReservasProfessorUseCase } from "../../../application/reserva-use
 import { AprovarReservaUseCase } from "../../../application/reserva-usecases/aprovar-reserva.usecase";
 import { RejeitarReservaUseCase } from "../../../application/reserva-usecases/rejeitar-reserva.usecase";
 import { ListarReservasCalendarioUseCase } from "../../../application/reserva-usecases/listar-reservas-calendario.usecase";
+import { CancelarReservaUseCase } from "../../../application/reserva-usecases/cancelar-reserva.usecase";
 import {
   DefinirPeriodoInativoProfessorUseCase,
   ObterPeriodoInativoProfessorUseCase,
@@ -301,4 +302,29 @@ export class ReservaController {
     }
   }
 
+  async cancelar(request: Request, response: Response) {
+    try {
+      const { id } = request.params;
+      const usuarioId = request.user!.id;
+      const isCoordenador = request.user!.role === "COORDENADOR";
+
+      const useCase = new CancelarReservaUseCase(
+        reservaRepository,
+      );
+
+      const reserva = await useCase.execute(
+        id,
+        usuarioId,
+        isCoordenador,
+      );
+
+      return response.json(reserva);
+    } catch (error) {
+      if (error instanceof Error) {
+        return response.status(400).json({ message: error.message });
+      }
+      return response.status(500).json({ message: 'Erro interno do servidor.' });
+    }
+  }
 }
+

@@ -12,6 +12,7 @@ export interface CalendarioFiltros {
 export interface ReservaRepository {
   create(reserva: Reserva): Promise<Reserva>
 
+  findById(id: string): Promise<Reserva | null>
   createMany(reservas: Reserva[]): Promise<Reserva[]>
 
   findAll(): Promise<Reserva[]>

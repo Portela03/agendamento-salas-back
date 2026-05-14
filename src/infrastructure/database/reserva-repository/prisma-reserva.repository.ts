@@ -98,9 +98,10 @@ export class PrismaReservaRepository implements ReservaRepository {
     if (
       status === ReservaStatus.AGUARDANDO ||
       status === ReservaStatus.APROVADA ||
-      status === ReservaStatus.REJEITADA
+      status === ReservaStatus.REJEITADA ||
+      status === ReservaStatus.CANCELADA
     ) {
-      return status;
+      return status as ReservaStatus;
     }
     return ReservaStatus.AGUARDANDO;
   }
@@ -137,6 +138,17 @@ export class PrismaReservaRepository implements ReservaRepository {
     return this.toDomain(reservaCriada);
   }
 
+  async findById(id: string): Promise<Reserva | null> {
+    const reserva = await prisma.reserva.findUnique({
+      where: { id },
+      include: {
+        professor: { select: { name: true } },
+        class: { select: { name: true } },
+      },
+    });
+
+    if (!reserva) return null;
+    return this.toDomain(reserva);
   async createMany(reservas: Reserva[]): Promise<Reserva[]> {
     if (reservas.length === 0) return [];
 
